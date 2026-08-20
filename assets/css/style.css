@@ -149,8 +149,8 @@ hr::before {
 .nav__brand-text { display: flex; flex-direction: column; line-height: 1.05; }
 .nav__letters { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; letter-spacing: .06em; }
 .nav__chapter {
-  font-size: .62rem; letter-spacing: .22em; text-transform: uppercase;
-  color: var(--ink-mute); font-weight: 600; white-space: nowrap; margin-top: 2px;
+  font-size: .68rem; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 600; white-space: nowrap; margin-top: 3px;
 }
 .nav__chapter--short { display: none; }
 @media (max-width: 560px) {
@@ -248,7 +248,12 @@ hr::before {
 }
 .hero__inner > div { display: flex; flex-direction: column; align-items: center; order: 2; }
 .hero__crest { order: 1; width: min(150px, 45%); margin-bottom: var(--sp-4); }
-.hero .eyebrow { border-top: 0; border-bottom: 0; padding-top: 0; color: var(--ink-mute); }
+.hero .eyebrow { border-top: 0; border-bottom: 0; padding-top: 0; color: var(--ink-mute); margin-bottom: var(--sp-2); }
+.hero__school {
+  font-family: var(--font-display); color: var(--navy-700);
+  font-size: clamp(1.5rem, 3vw, 2.15rem); font-weight: 600; letter-spacing: .04em;
+  line-height: 1.1; margin: 0 0 var(--sp-2);
+}
 .hero__title {
   color: var(--navy-700); margin: var(--sp-2) 0 var(--sp-3);
   font-size: clamp(2.8rem, 7vw, 5.2rem); font-weight: 500; line-height: 1.05;
@@ -442,6 +447,16 @@ blockquote.pull footer {
   background: var(--paper-2); color: var(--ink-mute); font-style: italic; font-size: .95rem; letter-spacing: .04em;
 }
 .gallery figcaption { padding: var(--sp-3) var(--sp-4); font-size: .95rem; color: var(--ink-soft); font-style: italic; border-top: 1px solid var(--line); }
+
+/* ---------- 18b. Frontispiece plate -------------------------------------- */
+/* A formal photograph set as a plate: thin frame, ruled mount, italic legend. */
+.plate { margin: 0; text-align: center; }
+.plate__frame { padding: var(--sp-3); border: 1px solid var(--line-2); background: var(--white); }
+.plate__frame img { width: 100%; display: block; }
+.plate figcaption {
+  margin-top: var(--sp-4); font-style: italic; color: var(--ink-mute);
+  font-size: 1.05rem; letter-spacing: .02em;
+}
 
 /* ---------- 19. Table ---------------------------------------------------- */
 .table-wrap { overflow-x: auto; border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
