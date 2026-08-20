@@ -31,7 +31,7 @@
   var NAV = [
     { href: "index.html",        label: "Home" },
     { href: "about.html",        label: "About" },
-    { href: "brothers.html",     label: "Brothers" },
+    { href: "brothers.html",     label: "Families" },
     { href: "brotherhood.html",  label: "Brotherhood" },
     { href: "philanthropy.html", label: "Philanthropy" },
     { href: "alumni.html",       label: "Alumni" },
@@ -107,12 +107,12 @@
             "<div>" +
               '<div class="footer-letters">Λ Φ Ε</div>' +
               "<p><strong>" + esc(C.designation) + " Chapter</strong><br>" + esc(C.school) + "<br>" +
-              "Chartered " + esc(C.chartered) + " &mdash; the fraternity&rsquo;s first chapter outside the United States.</p>" +
+              "Chartered " + esc(C.chartered) + ". The fraternity&rsquo;s first chapter outside the United States.</p>" +
             "</div>" +
           "</div>" +
           "<div><h4>Chapter</h4><ul>" +
             '<li><a href="' + PREFIX + 'about.html">About Alpha Xi</a></li>' +
-            '<li><a href="' + PREFIX + 'brothers.html">Brothers &amp; Exec</a></li>' +
+            '<li><a href="' + PREFIX + 'brothers.html">Families &amp; Charter</a></li>' +
             '<li><a href="' + PREFIX + 'brotherhood.html">Brotherhood</a></li>' +
             '<li><a href="' + PREFIX + 'alumni.html">Alumni</a></li>' +
           "</ul></div>" +
@@ -127,7 +127,7 @@
           "</ul></div>" +
         "</div>" +
         '<div class="footer-bottom">' +
-          "<span>&copy; " + new Date().getFullYear() + " Lambda Phi Epsilon International Fraternity, Inc. &mdash; " + esc(C.designation) + " Chapter.</span>" +
+          "<span>&copy; " + new Date().getFullYear() + " Lambda Phi Epsilon International Fraternity, Inc. &middot; " + esc(C.designation) + " Chapter.</span>" +
           "<span>" + esc(N.mottoGreek || "") + "</span>" +
         "</div>" +
       "</div>";

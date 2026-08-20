@@ -12,8 +12,8 @@ window.LPHIE.chapter = {
   city: "Toronto, Ontario",
 
   /* --- TODO: replace with your real chapter contacts --------------------- */
-  email: "torontolambdas@gmail.com",          // TODO: confirm
-  rushEmail: "torontolambdas@gmail.com",      // TODO: confirm
+  email: "alphaxilambdas@gmail.com",
+  rushEmail: "alphaxilambdas@gmail.com",
   instagram: "torontolambdas",                // TODO: confirm handle (no @)
   facebook: "",                               // optional
   youtube: "",                                // optional
@@ -40,7 +40,7 @@ window.LPHIE.national = {
   mascot: "Dragon",
   nicknames: ["Lambdas", "LFE", "LPhiE", "人中王"],
   values: [
-    { name: "Authenticity",         text: "Showing one's genuine self to others, regardless of external pressures." },
+    { name: "Authenticity",         text: "Showing one's true self to others, without regard for outside pressure." },
     { name: "Courageous Leadership", text: "Acting with integrity to build a more compassionate world, particularly during challenging times." },
     { name: "Cultural Heritage",    text: "The ideas and experiences passed down through generations that connect a community across time." },
     { name: "Love",                 text: "Demonstrating care and respect toward oneself, one's brothers, and the broader world." },
