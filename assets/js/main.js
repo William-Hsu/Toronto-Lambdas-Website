@@ -57,7 +57,7 @@
     host.innerHTML =
       '<nav class="wrap nav" aria-label="Primary">' +
         '<a class="nav__brand" href="' + PREFIX + 'index.html">' +
-          '<img class="nav__crest" src="' + PREFIX + 'assets/img/crest.png" alt="" width="40" height="40">' +
+          '<img class="nav__crest" src="' + PREFIX + 'assets/img/crest-navy.png" alt="" width="40" height="40">' +
           '<span class="nav__brand-text">' +
             '<span class="nav__letters">ΛΦΕ</span>' +
             '<span class="nav__chapter">' +
