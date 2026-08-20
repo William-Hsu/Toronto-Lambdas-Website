@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-root="">
+<head>
+<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#12296B">
+    <link rel="icon" href="assets/img/crest.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+  <title>Brothers — ΛΦΕ Alpha Xi</title>
+  <meta name="description" content="The executive board, active brothers, family lines and charter class of the Alpha Xi Chapter of Lambda Phi Epsilon at the University of Toronto.">
+  <meta property="og:title" content="Brothers — ΛΦΕ Alpha Xi">
+  <meta property="og:description" content="The executive board, active brothers, family lines and charter class of the Alpha Xi Chapter of Lambda Phi Epsilon at the University of Toronto.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://yyzlambdas.com/assets/img/crest.svg">
+  <meta property="og:url" content="https://yyzlambdas.com/brothers.html">
+  <meta property="og:site_name" content="ΛΦΕ Alpha Xi — Toronto Lambdas">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://yyzlambdas.com/brothers.html">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header" id="site-header"></header>
+  <main id="main">
+    <section class="page-head">
+      <div class="wrap"><div class="page-head__inner">
+        <p class="breadcrumb"><a href="index.html">Home</a> &middot; Brothers</p>
+        <h1>Brothers</h1>
+        <p>The executive board that runs Alpha Xi, and the actives who make it what it is.</p>
+      </div></div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="wrap">
+        <div class="callout">
+          <p><strong>Chapter editors:</strong> this page is generated from <code>data/roster.js</code>. Open that
+          file, replace the <code>TODO</code> entries with real names, and save &mdash; nothing needs rebuilding.
+          Photos go in <code>assets/img/brothers/</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="wrap">
+        <p class="eyebrow">Leadership</p>
+        <h2>Executive board</h2>
+        <p class="lede measure">Every position is elected by the chapter and turns over annually &mdash; which
+        means most brothers hold a board or chair seat at some point.</p>
+        <div class="brother-grid mt-6" id="exec-grid"></div>
+      </div>
+    </section>
+
+    <section class="section section--paper">
+      <div class="wrap">
+        <p class="eyebrow">Active chapter</p>
+        <h2>The roster</h2>
+        <div class="roster-toolbar">
+          <label for="roster-search">Search</label>
+          <input type="search" id="roster-search" placeholder="Name, nickname, programme, family&hellip;">
+          <label for="roster-term">Class</label>
+          <select id="roster-term"></select>
+          <span class="roster-count" id="roster-count"></span>
+        </div>
+        <div id="roster-grid"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <p class="eyebrow">Lineage</p>
+        <h2>Families</h2>
+        <p class="lede measure">
+          Every new member is paired with a big brother, and every big brother belongs to a family line that
+          traces back through the chapter&rsquo;s history. These are the Uji families of Alpha Xi.
+        </p>
+        <div class="grid grid--3 mt-6" id="families-grid"></div>
+      </div>
+    </section>
+
+    <section class="section section--navy">
+      <div class="wrap">
+        <p class="eyebrow">Where it started</p>
+        <h2>Charter class of 2004</h2>
+        <p class="lede">The twelve men who brought &Lambda;&Phi;&Epsilon; to Canada.</p>
+        <div class="card mt-6">
+          <ul id="charter-list" style="columns:3; column-gap:2rem"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="data/chapter.js"></script>
+  <script src="data/roster.js"></script>
+  <script src="data/alumni.js"></script>
+  <script src="data/content.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

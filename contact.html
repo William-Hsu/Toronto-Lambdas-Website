@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-root="">
+<head>
+<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#12296B">
+    <link rel="icon" href="assets/img/crest.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+  <title>Contact — ΛΦΕ Alpha Xi</title>
+  <meta name="description" content="Contact the Alpha Xi Chapter of Lambda Phi Epsilon at the University of Toronto about rush, philanthropy, collaboration, alumni relations or a conduct concern.">
+  <meta property="og:title" content="Contact — ΛΦΕ Alpha Xi">
+  <meta property="og:description" content="Contact the Alpha Xi Chapter of Lambda Phi Epsilon at the University of Toronto about rush, philanthropy, collaboration, alumni relations or a conduct concern.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://yyzlambdas.com/assets/img/crest.svg">
+  <meta property="og:url" content="https://yyzlambdas.com/contact.html">
+  <meta property="og:site_name" content="ΛΦΕ Alpha Xi — Toronto Lambdas">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://yyzlambdas.com/contact.html">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header" id="site-header"></header>
+  <main id="main">
+    <section class="page-head">
+      <div class="wrap"><div class="page-head__inner">
+        <p class="breadcrumb"><a href="index.html">Home</a> &middot; Contact</p>
+        <h1>Contact</h1>
+        <p>Rushing, collaborating, alumni reconnecting, or a concern you need raised &mdash;
+        this all reaches a real brother.</p>
+      </div></div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="grid grid--2" style="gap:3rem; align-items:start">
+          <div>
+            <p class="eyebrow">Send us a note</p>
+            <h2>Get in touch</h2>
+            <form class="form mt-6" id="contact-form">
+              <div class="field">
+                <label for="f-name">Name</label>
+                <input id="f-name" name="name" type="text" required autocomplete="name">
+              </div>
+              <div class="field">
+                <label for="f-email">Email</label>
+                <input id="f-email" name="email" type="email" required autocomplete="email">
+              </div>
+              <div class="field">
+                <label for="f-program">Year &amp; programme <span style="font-weight:400;color:var(--ink-mute)">(optional)</span></label>
+                <input id="f-program" name="program" type="text" placeholder="e.g. 2nd year, Rotman Commerce">
+              </div>
+              <div class="field">
+                <label for="f-topic">What is this about?</label>
+                <select id="f-topic" name="topic">
+                  <option>Rush &amp; recruitment</option>
+                  <option>Philanthropy / registry drive</option>
+                  <option>Collaboration or sponsorship</option>
+                  <option>Alumni reconnecting</option>
+                  <option>Media &amp; press</option>
+                  <option>Conduct concern</option>
+                  <option>Something else</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="f-message">Message</label>
+                <textarea id="f-message" name="message" required></textarea>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn--primary" type="submit">Send message</button>
+              </div>
+              <p class="field__hint" id="form-note">
+                This opens your email client with the message pre-filled &mdash; a static site cannot send mail
+                on its own. Prefer a real inbox form? See the note in <code>README.md</code>.
+              </p>
+            </form>
+          </div>
+
+          <div>
+            <div class="card">
+              <h3>Direct</h3>
+              <p><strong>Email</strong><br><a data-mailto href="#"><span data-fill="email">—</span></a></p>
+              <p><strong>Instagram</strong><br><a data-instagram href="#">Message us on Instagram &nearr;</a></p>
+              <p><strong>Where we are</strong><br>
+                <span data-fill="designation">Alpha Xi</span> Chapter<br>
+                <span data-fill="school">University of Toronto</span><br>
+                <span data-fill="city">Toronto, Ontario</span>
+              </p>
+            </div>
+
+            <div class="card mt-6">
+              <h3>Interested in rushing?</h3>
+              <p>The fastest route is the rush page &mdash; the schedule and every common question are there.</p>
+              <div class="btn-row"><a class="btn btn--ghost" href="rush.html">Go to rush</a></div>
+            </div>
+
+            <div class="card mt-6">
+              <h3>Raising a concern</h3>
+              <p>
+                Hazing and misconduct are prohibited by the international fraternity, the University of Toronto,
+                and by law. Concerns can be raised with our executive board using the form, or reported directly
+                to the international fraternity.
+              </p>
+              <p><a href="https://lambdaphiepsilon.org/">lambdaphiepsilon.org &nearr;</a></p>
+            </div>
+
+            <div class="card mt-6">
+              <h3>Supporting the chapter</h3>
+              <p>
+                Alumni contributions, sponsorships and in-kind support for philanthropy events all go through the
+                executive board. Use the form and pick &ldquo;Collaboration or sponsorship&rdquo;.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="data/chapter.js"></script>
+  <script src="data/roster.js"></script>
+  <script src="data/alumni.js"></script>
+  <script src="data/content.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
