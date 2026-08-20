@@ -108,8 +108,11 @@ the official artwork, drop the real files in and the site picks them up automati
 | `assets/img/brothers/` | Brother headshots — portrait crop, ~600×800px |
 | `assets/img/gallery/` | Event photos — landscape, ~1200px wide |
 
-If you add `crest.png`, change the `src` in `assets/js/main.js` (search for `crest.svg`) — or simply
-overwrite `assets/img/crest.svg` with the official vector if you have it.
+The official crest ships as three transparent PNGs derived from the seal artwork:
+`crest.png` (white ink, for navy backgrounds — nav, hero, footer), `crest-navy.png`
+(navy ink, used as the favicon), and `og-cover.png` (the flag lockup used for social
+previews). To swap in higher-resolution artwork, overwrite these files in place — the
+references in `assets/js/main.js` and the HTML `<head>`s already point at them.
 
 **Compress photos before committing.** Aim for under 300KB each; `squoosh.app` does this in a browser.
 
