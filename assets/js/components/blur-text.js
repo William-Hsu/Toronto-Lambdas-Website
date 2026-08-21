@@ -29,22 +29,44 @@
    starts, which composes, where skipping them left a hole.
 
    NO FLASH, AND NO PERMANENTLY INVISIBLE TEXT (§9a). The site's scripts are
-   plain end-of-body tags, so without help the fully inked masthead paints
-   and then blinks out when the script arms it. The fix is two-sided and both
-   sides are needed:
-     — JS: the moment this file is evaluated — before DOMContentLoaded, in the
-       same parser pause as the <script> tag — it stamps data-bt-prehide on
-       the candidates and one class, bt-prehide, on <html>. Nothing is hidden
-       until that class exists, so a page whose JS is off, blocked or missing
-       shows plain, fully visible text and always did.
-     — CSS: the pre-hide rule carries its OWN expiry (a 1ms animation with a
-       2.6s delay that sets visibility back). If this script is evaluated and
-       then throws before it can arm anything, the page un-hides itself with
-       no script involved at all.
-   On top of those, autoInit's finally clause drops the class and every
-   attribute at the end of the pass, whatever happened inside it. With JS
-   disabled: the class is never added, no rule matches, every heading is
-   inked from the first paint, and no observer, split or claim ever happens.
+   plain end-of-body tags, so this file is evaluated late: after the parser
+   has read the whole body, and — on a cold cache, where the parser stalls on
+   one of the sixteen tags above it — possibly after the browser has already
+   committed a frame. The guarantee is therefore NOT "the masthead is always
+   hidden before it paints". A stylesheet cannot hide it (it must not: JS-off
+   readers get plain text), and an end-of-body script cannot outrun a paint
+   it did not get to run before. What IS guaranteed, unconditionally, is that
+   no reader ever watches inked text blink out:
+     — Before it hides anything, §9a asks the Paint Timing API whether a
+       CONTENTFUL frame has already been committed. If one has, an ON-SCREEN
+       candidate is left completely alone: never marked, so mount() declines
+       it (requireOffscreen "auto" reads the missing mark) and the reader
+       simply keeps the text already in front of them, unanimated. Off-screen
+       blocks were never painted, so they still pre-hide and still reveal.
+     — If no contentful frame has been committed, the attribute and the class
+       both go on synchronously, in one task, so no frame can be painted with
+       the block inked afterwards. The hide either wins outright or does not
+       happen.
+   One line of HTML would let the masthead animate on a cold cache too — add
+   the class in the inline <head> script the page already runs — but this
+   file owns no HTML and nothing here depends on that line existing.
+
+   ARMED TEXT IS HIDDEN TEXT, so the window is bounded three ways, all
+   sharing ONE number (PREHIDE_LIFE_MS, §1): the CSS rule carries its own
+   expiry, written into the stylesheet as a custom property so the two cannot
+   drift; a JS backstop clears the marks at the same deadline whatever
+   happens to DOMContentLoaded; and autoInit's finally clause drops the class
+   and every attribute at the end of the pass, whatever happened inside it.
+   Past the deadline mount() treats a mark as DEAD and declines an on-screen
+   block rather than blanking text the expiry has already put back.
+
+   The hidden state is `opacity: 0` — the same rendering the armed state
+   uses. The subtree keeps its box, its place in the accessibility tree and
+   its hit-testing (visibility:hidden would take the h1 and both CTAs out of
+   all three), and the hand-over from pre-hidden to armed is not merely
+   frame-perfect but pixel-identical. With JS disabled: the class is never
+   added, no rule matches, every heading is inked from the first paint, and
+   no observer, split or claim ever happens.
 
    Differences from the React original, all deliberate:
    — The reference is handed a `text` prop and renders a flex row of motion
@@ -176,6 +198,18 @@
   var PREHIDE = "data-bt-prehide";
   var PREHIDE_CLASS = "bt-prehide";
 
+  /* HOW LONG A PRE-HIDE MAY LAST, in ms. Three mechanisms share this one
+     number so they cannot disagree with each other: the stylesheet animates
+     the hiding away after it (reading --bt-prehide-life, which §9a writes on
+     <html> from the constant below), a JS backstop clears the marks at it,
+     and mount() stops honouring a mark past it. It is deliberately short.
+     The pre-hidden block is this page's LCP element, so a slow device losing
+     the reveal costs less than the same device holding its masthead back —
+     and past the deadline the reveal is not merely skipped but REFUSED, so
+     the expiry can never un-hide a heading that mount() then blanks again. */
+  var PREHIDE_LIFE_MS = 1200;
+  var PREHIDE_LIFE_VAR = "--bt-prehide-life";
+
   /* The eleven sibling components' opt-in attributes, kept as their own list
      because two questions are asked of it: HARD_SKIP folds it in (never
      touch one of these), and §5b asks whether a member CONTAINS one (fade it
@@ -212,7 +246,7 @@
     "#instagram-embed", "#form-note", "#roster-grid", "#exec-grid",
     "[data-fill]",
     /* A drop cap is a floated ::first-letter: leave the whole paragraph be. */
-    ".dropcap", ".skip", ".breadcrumb",
+    ".dropcap", ".skip",
     /* Interactive, replaced and tabular elements. */
     "form", "table", "thead", "tbody", "tr", "th", "td",
     "details", "summary", "code", "pre", "label", "button",
@@ -222,8 +256,19 @@
   /* MAY FADE IN WHOLE, BUT IS NEVER SPLIT INTO WORDS. Small caps, tracked
      chrome, numerals and pull quotes: a word split changes what the line
      measures, and none of them gain anything from arriving one word at a
-     time. They still take part in a block reveal — as one piece. */
+     time. They still take part in a block reveal — as one piece.
+
+     This is where an element goes when it is excluded for TYPOGRAPHIC
+     reasons rather than because somebody else owns it. .breadcrumb is the
+     case that makes the distinction matter: it is plain inert markup and it
+     is the FIRST line of .page-head__inner on nine of the ten pages, so
+     hard-skipping it left the block revealing with its top line already
+     finished and static — the same rectangular hole .ornament and
+     .hero__sub used to punch in the masthead. Here it becomes a member, gets
+     its piece of the timeline and fades as one box; the <a> inside it is
+     never split, moved or rebuilt, exactly as before. */
   var NO_SPLIT = [
+    ".breadcrumb",
     ".ornament", ".hero__sub", ".callout", ".timeline", ".tag", ".btn",
     ".field__hint", ".card__num", ".card__icon", ".stat__value",
     ".stat__label", ".footer-letters", ".nav__letters", ".timeline__year",
@@ -353,8 +398,8 @@
 
   /* Null when there is no box at all — display:none, or a subtree that was
      never laid out. Such an element is neither painted nor animatable, so it
-     is left out of the timeline entirely. visibility:hidden (which §9a uses)
-     still measures, so pre-hidden candidates report their real geometry. */
+     is left out of the timeline entirely. opacity:0 (which §9a uses) still
+     measures, so pre-hidden candidates report their real geometry. */
   function rectOf(el) {
     if (!el.getBoundingClientRect) return null;
     var r;
@@ -375,6 +420,64 @@
     var r = rectOf(el);
     if (!r) return false;
     return r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw;
+  }
+
+  function nowMs() {
+    return (window.performance && typeof window.performance.now === "function")
+      ? window.performance.now()
+      : +new Date();
+  }
+
+  /* Does this browser report Paint Timing at all? Chrome, Edge, Firefox 84+
+     and Safari 14.1+ do; where it is missing the parse state is the only
+     signal left, and the fallback below says so. */
+  var PAINT_TIMING = (function () {
+    try {
+      var po = window.PerformanceObserver;
+      var types = po && po.supportedEntryTypes;
+      return !!(types && typeof types.indexOf === "function" &&
+        types.indexOf("paint") >= 0);
+    } catch (e) { return false; }
+  })();
+
+  /* HAS THE BROWSER ALREADY COMMITTED A FRAME CONTAINING CONTENT? Only such a
+     frame can have inked a heading, which makes this the exact question §9a
+     has to answer before it hides one — a background-only first paint has
+     shown the reader nothing, so this reads first-contentful-paint by name
+     rather than taking any paint as proof.
+
+     Reading it synchronously is sound: the entry is added to the performance
+     buffer as part of the frame's own rendering steps, so by the time any
+     later script runs it is already there. */
+  function contentPainted() {
+    try {
+      if (PAINT_TIMING && window.performance && window.performance.getEntriesByType) {
+        var entries = window.performance.getEntriesByType("paint") || [];
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].name === "first-contentful-paint") return true;
+        }
+        return false;
+      }
+    } catch (e) {}
+    /* No Paint Timing. During the initial parse a paint is possible but not
+       yet certain; once the parser is done it is all but certain. Guessing
+       "painted" costs one reveal; guessing the other way costs a blink, so
+       the doubt is resolved toward leaving text alone. */
+    return document.readyState !== "loading";
+  }
+
+  /* IS THE PRE-HIDE STILL DOING ANYTHING? Only while both marks are on AND
+     the stylesheet's expiry has not run out. mount() asks before it reads a
+     mark as "this block was hidden before the reader ever saw it": a mark
+     the expiry has already lifted is showing inked text right now, and
+     arming on it would blank that text a SECOND time. */
+  var prehideStamp = 0;
+
+  function prehideLive() {
+    if (!prehideStamp) return false;
+    var docEl = document.documentElement;
+    if (!docEl || !docEl.classList || !docEl.classList.contains(PREHIDE_CLASS)) return false;
+    return (nowMs() - prehideStamp) < PREHIDE_LIFE_MS;
   }
 
   /* ---- 3. Eligibility ---------------------------------------------------- */
@@ -661,7 +764,14 @@
        in §1 for the three settings and why "auto" is the default. */
     var req = opts.requireOffscreen;
     if (req !== false) {
-      var prehidden = root.getAttribute(PREHIDE) != null;
+      /* "Pre-hidden" has to mean HIDDEN RIGHT NOW, by a mark this reader
+         never saw lifted. Two ways it can be a lie, and both end in the same
+         artifact — text the reader is looking at being blanked a second
+         time: the mark survived a pass that dropped the class, or the
+         stylesheet's expiry (PREHIDE_LIFE_MS) has already put the block
+         back on the page. prehideLive() rules out both, so an expired
+         pre-hide degrades to "no reveal" instead of to a blink. */
+      var prehidden = root.getAttribute(PREHIDE) != null && prehideLive();
       if (req === true && onScreen(root)) return null;
       if (req !== true && !prehidden && onScreen(root)) return null;
     }
@@ -1025,40 +1135,96 @@
   /* ---- 9a. The pre-paint pass -------------------------------------------
      Runs at SCRIPT EVALUATION — the parser is paused on this file's own
      <script> tag, before DOMContentLoaded and before the components below it
-     have run — which is the last moment at which a heading can be hidden
-     without the reader having seen it inked first.
+     have run. That is the EARLIEST this file can act, but it is not
+     necessarily before the first paint: sixteen parser-blocking tags sit
+     above it, and a cold cache stalling on any one of them lets the browser
+     commit a frame of the fully inked masthead first. So the race is not
+     assumed — it is decided, per element, and losing it is not allowed to
+     produce the artifact:
 
-     What it does NOT do is decide anything: mount() is still the only judge
-     of what gets animated. This marks candidates broadly and cheaply, and
-     everything it marked is un-marked again at the end of autoInit whether
-     it was taken or not. Two independent things un-hide the page if this
-     script stops here and never reaches autoInit: the stylesheet's own
-     expiry on the pre-hide rule, and — for the ordinary case — the finally
-     clause in autoInit. With JS off, the class below is never added and no
-     pre-hide rule can match anything. */
+       — contentPainted() true and the element is ON SCREEN: the reader may
+         already be looking at it, so hiding it now IS the flash. It is not
+         marked at all. mount() reads the missing mark, declines it, and the
+         text simply stays as it is — no reveal, and nothing blinks.
+       — contentPainted() false, or the element is off screen: nothing has
+         been shown to anybody, so the mark goes on. Everything below runs
+         synchronously, so no frame can be committed between the read and
+         the hide.
+
+     What this pass does NOT do is decide what animates: mount() is still the
+     only judge. This marks candidates broadly and cheaply, and everything it
+     marked is un-marked again whether it was taken or not — by autoInit's
+     finally clause, by the backstop timer armed here, or by the stylesheet's
+     own expiry, any one of which is enough on its own. With JS off, the
+     class is never added and no pre-hide rule can match anything. */
   function prehide() {
     if (reduced()) return;
     var docEl = document.documentElement;
     if (!docEl || !document.body) return;
+    var late = contentPainted();
     var marked = 0;
     eachTarget(function (node) {
+      /* Already marked by an earlier pass — and marked back when marking was
+         still safe, which is the only way it could have happened. Counted so
+         the class below is not dropped on a second pass that adds nothing. */
+      if (node.getAttribute(PREHIDE) != null) { marked++; return; }
       if (node.getAttribute(CLAIM)) return;
       if (node.id) return;
       if (matches(node, HARD_SKIP)) return;
       if (hasAncestor(node, HARD_SKIP)) return;
       if (!/\S/.test(node.textContent || "") && !hasElementChild(node)) return;
+      /* The race, lost. Asked LAST because onScreen() forces layout, so the
+         cost is only ever paid when a frame has already been committed and
+         the layout is therefore clean — never on the pre-paint path, where
+         a forced layout would delay the very paint being raced. */
+      if (late && onScreen(node)) return;
       node.setAttribute(PREHIDE, "");
       marked++;
     });
-    if (marked && docEl.classList) docEl.classList.add(PREHIDE_CLASS);
+    if (!marked) return;
+    /* One number, three mechanisms: the stylesheet reads the property, the
+       backstop and mount() read the constant. They cannot drift apart. */
+    if (docEl.style && docEl.style.setProperty) {
+      try { docEl.style.setProperty(PREHIDE_LIFE_VAR, PREHIDE_LIFE_MS + "ms"); } catch (e) {}
+    }
+    /* Stamped ONCE. A second pass must not extend a window the stylesheet
+       has been counting down since the first one. */
+    if (!prehideStamp) prehideStamp = nowMs();
+    if (docEl.classList) docEl.classList.add(PREHIDE_CLASS);
+    armExpiry();
+  }
+
+  /* The JS half of the same fuse the stylesheet carries. The CSS expiry
+     covers a script that throws; this covers everything that can go wrong
+     with the SWEEP instead — a stylesheet that stalls DOMContentLoaded past
+     the deadline, a sibling listener that throws before ours is reached, a
+     page where the event simply never arrives. Either half is enough: the
+     marks come off, the text is on the page, and mount() then declines an
+     on-screen block rather than hiding it all over again. */
+  var expiryTimer = 0;
+
+  function armExpiry() {
+    if (expiryTimer) return;
+    expiryTimer = window.setTimeout(function () {
+      expiryTimer = 0;
+      clearPrehide();
+    }, PREHIDE_LIFE_MS);
   }
 
   /* The class comes off FIRST and on its own line: the pre-hide rule needs
      both marks at once, so with the class gone nothing on the page can still
      be hidden by this component even if the sweep below never completes. */
   function clearPrehide() {
+    if (expiryTimer) { window.clearTimeout(expiryTimer); expiryTimer = 0; }
+    prehideStamp = 0;
     var docEl = document.documentElement;
     if (docEl && docEl.classList) docEl.classList.remove(PREHIDE_CLASS);
+    if (docEl && docEl.style && docEl.style.removeProperty) {
+      try { docEl.style.removeProperty(PREHIDE_LIFE_VAR); } catch (e) {}
+      /* Only when it is empty, i.e. when nothing but this component ever
+         wrote to it — <html> is shared with theme.js and with the page. */
+      if (docEl.getAttribute("style") === "") docEl.removeAttribute("style");
+    }
     try {
       var nodes = document.querySelectorAll("[" + PREHIDE + "]");
       Array.prototype.forEach.call(nodes, function (node) {
@@ -1107,16 +1273,50 @@
     }
   }
 
+  /* IS THIS FILE'S <script> THE LAST OF THE SET? main.js and all eleven
+     sibling components register a DOMContentLoaded listener at THEIR
+     evaluation time and do their work synchronously inside it, and each
+     component publishes itself on window.LPHIE.components as it evaluates.
+     So a registry that already holds a sibling proves their tags ran before
+     this one, which proves their listeners run before this file's — and
+     being after them is the entire thing the task hop in schedule() was ever
+     buying. Read ONCE, at evaluation: by DOMContentLoaded every tag has
+     evaluated and the question no longer means anything. */
+  var TAG_IS_LAST = (function () {
+    var reg = window.LPHIE.components;
+    for (var key in reg) {
+      if (Object.prototype.hasOwnProperty.call(reg, key) && key !== "blurText") return true;
+    }
+    return false;
+  })();
+
   /* Every candidate is READ inside autoInit, never at module-evaluation
      time, and the exclusion gate in §3 assumes the page has finished being
      assembled. Script ORDER is therefore not left to a comment in an HTML
-     file that nobody can enforce: the pass is queued as a task AFTER
-     DOMContentLoaded, and main.js and all eleven sibling components do their
-     work inside DOMContentLoaded handlers, so their subtrees exist and their
-     claims are stamped by the time this runs — wherever the tag is placed.
+     file that nobody can enforce — but the ordering is bought with the
+     CHEAPEST instrument that supplies it, because the pre-hidden block is
+     the page's LCP element and every millisecond it waits is a millisecond
+     the masthead is not on the glass:
+
+       — provably last (TAG_IS_LAST): run inside the DOMContentLoaded
+         handler, synchronously. Every listener for that event runs in ONE
+         task, so the browser cannot commit a frame between the last
+         sibling's init and the moment this pass arms or releases the block.
+         The task hop below can and does: on a mid-range phone the main
+         thread has just blown its frame budget rendering eleven components,
+         and a fresh setTimeout task is something the browser is free to
+         paint in front of — one frame of blank masthead.
+       — otherwise (loaded from <head>, injected by hand, or a page that ships
+         no other component at all): keep the hop, so siblings whose tags come
+         later still get to claim first. Declining to prove it is the safe
+         answer, not the broken one — the block is still bounded by
+         PREHIDE_LIFE_MS, and a page with no sibling components has no
+         eleven-component burst to blow a frame budget with either.
+
      The pre-paint pass (§9a) is the one thing that must happen sooner, and
      it only ever writes an attribute it later takes back. */
-  function schedule() {
+  function schedule(sameTask) {
+    if (sameTask) { autoInit(); return; }
     window.setTimeout(autoInit, 0);
   }
 
@@ -1125,11 +1325,17 @@
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
       /* A second, harmless pass: covers the case of this file being loaded
-         from <head>, where the body did not exist yet at evaluation time. */
+         from <head>, where the body did not exist yet at evaluation time.
+         By this point a contentful frame has almost always been committed,
+         so §9a's race check keeps it from hiding anything the reader can
+         already see — the second pass can only ever add off-screen blocks. */
       prehide();
-      schedule();
+      schedule(TAG_IS_LAST);
     });
   } else {
-    schedule();
+    /* "interactive" means the parser is done but DOMContentLoaded has not
+       fired yet, so the siblings' listeners are still pending and the hop is
+       still needed. Only "complete" proves everything has already run. */
+    schedule(TAG_IS_LAST && document.readyState === "complete");
   }
 })();

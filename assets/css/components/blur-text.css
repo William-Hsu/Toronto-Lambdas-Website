@@ -6,15 +6,19 @@
 
    Four things this file deliberately does.
 
-   §0 hides a candidate BEFORE the first paint, and un-hides it again on its
-   own if the script never arms it. The rule needs two marks at once — a
-   class on <html> that only the script can add, and an attribute on the
-   element that only the script can stamp — so with JS disabled, blocked or
-   thrown, nothing in this file can hide anything: every heading is inked
-   from the first paint and stays that way. When the script DOES run, the
-   hiding it turns on carries its own expiry: a one-millisecond animation on
-   a 2.6s delay puts visibility back, with no script involved, so a throw
-   between "hide" and "arm" cannot leave a blank block on the page.
+   §0 hides a candidate that has NOT yet been painted, and un-hides it again
+   on its own if the script never arms it. The rule needs two marks at once —
+   a class on <html> that only the script can add, and an attribute on the
+   element that only the script can stamp, and which it stamps only after
+   checking the Paint Timing API — so with JS disabled, blocked or thrown,
+   nothing in this file can hide anything: every heading is inked from the
+   first paint and stays that way, and even with JS running, an element the
+   browser has already inked is never marked at all. When the script DOES
+   hide something, the hiding carries its own expiry: a one-millisecond
+   animation on a --bt-prehide-life delay (1.2s) puts the opacity back with
+   no script involved, so a throw between "hide" and "arm" cannot leave a
+   blank block on the page — and past that deadline the script refuses to
+   arm an on-screen block, so the un-hide is never undone by a second blank.
 
    It never hides anything on the bare .blur-text class — only
    .blur-text--armed hides, and the script adds that in the same task in
@@ -40,21 +44,40 @@
 
 /* ---- 0. The pre-paint hook ---------------------------------------------- */
 /* Both marks are written by blur-text.js: the class at script evaluation,
-   the attribute on each candidate. Neither exists in the HTML, and neither
-   survives the mount pass — the script clears both in a finally clause
-   whatever happened inside it. visibility (not opacity) so nothing is
-   promoted to a layer and no stacking context is created for the fraction of
-   a second this is on; the box still measures, so every component that reads
-   its own geometry during this window reads the truth. */
+   the attribute on each candidate — and only on a candidate the script has
+   established was not already painted, so this can never hide text a reader
+   is looking at. Neither mark exists in the HTML, and neither survives the
+   mount pass.
+
+   opacity, NOT visibility. The pre-hidden block is the page's h1, its crest
+   and both call-to-action links, and visibility:hidden takes a subtree out
+   of the accessibility tree and out of hit-testing for as long as it is on:
+   a screen reader landing in that window would find no heading, and a tap
+   would fall through. opacity:0 leaves the box, the a11y tree and hit
+   testing exactly as they are — and it is the SAME rendering .blur-text
+   --armed uses one line later, so the hand-over from pre-hidden to armed is
+   not merely frame-perfect but pixel-identical. The stacking context it
+   costs lasts under a second, contains nothing positioned against the page,
+   and — unlike a filter — establishes no containing block for the fixed
+   [data-gradual-blur] overlay. Geometry is untouched, so every component
+   that measures its own box during this window still reads the truth. */
 html.bt-prehide [data-bt-prehide] {
-  visibility: hidden;
-  /* The expiry. If the script is evaluated and then throws before it can
-     arm anything, this reveals the block with no script involved at all. */
-  animation: bt-prehide-expire 1ms linear 2.6s forwards;
+  opacity: 0;
+  /* THE EXPIRY, and the reason it is a CSS animation rather than a timer:
+     it needs to fire on a page whose script threw between "hide" and "arm",
+     and an opacity animation can be run by the compositor, so it fires even
+     while the main thread is busy with the very component work that delayed
+     the sweep. The delay is written by the script as --bt-prehide-life from
+     one constant (PREHIDE_LIFE_MS), so the stylesheet, the script's own
+     backstop timer and mount()'s "is this mark still live" test cannot
+     disagree; the value below is the fallback, not the authority. Past it
+     mount() REFUSES an on-screen block, so the un-hide is never followed by
+     the same text being blanked a second time. */
+  animation: bt-prehide-expire 1ms linear var(--bt-prehide-life, 1200ms) forwards;
 }
 
 @keyframes bt-prehide-expire {
-  to { visibility: visible; }
+  to { opacity: 1; }
 }
 
 /* ---- 1. Host ------------------------------------------------------------ */
@@ -188,7 +211,7 @@ html.bt-prehide [data-bt-prehide] {
    all never a hidden one. */
 @media (prefers-reduced-motion: reduce) {
   html.bt-prehide [data-bt-prehide] {
-    visibility: visible !important;
+    opacity: 1 !important;
     animation: none !important;
   }
   .blur-text--armed .blur-text__piece,
@@ -208,7 +231,7 @@ html.bt-prehide [data-bt-prehide] {
    scrolled to when the print was taken. */
 @media print {
   html.bt-prehide [data-bt-prehide] {
-    visibility: visible !important;
+    opacity: 1 !important;
     animation: none !important;
   }
   .blur-text--armed .blur-text__piece,
