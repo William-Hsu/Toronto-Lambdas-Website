@@ -22,8 +22,9 @@
 .section--navy,
 .cta-band {
   position: relative;
-  /* The gradient does the separating now; a hard rule would fight it. */
-  border-block: none;
+  /* The engraved rule STAYS — it is the seam. The gradient simply softens the
+     colour on either side of it, so the divider reads as a line with a halo
+     rather than as a hard colour cut. */
 }
 
 /* A page header may take the plate tone. Some pages hold an odd number of
@@ -33,7 +34,7 @@
 .page-head.section--navy {
   background: var(--plate-bg);
   color: var(--plate-ink);
-  border-bottom: none;
+  border-bottom: 3px double var(--plate-accent);
 }
 .page-head.section--navy h1 { color: var(--plate-head); }
 .page-head.section--navy p  { color: var(--plate-ink); }

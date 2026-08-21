@@ -1,0 +1,54 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   Masthead — corrections to the header furniture that main.js injects, plus
+   the decorative band that sits directly beneath it.
+
+   (Fold these into style.css §7 once nothing else is editing that file.)
+   ========================================================================== */
+
+/* ---- 1. The Rush plate --------------------------------------------------
+   "RUSH ΛΦΕ" was breaking onto two lines inside its rule, which reads as a
+   typographic accident rather than a plate. It stays on one line and the
+   plate is cut wide enough to carry it. */
+.nav__cta {
+  white-space: nowrap;
+  padding-inline: clamp(0.9rem, 1.5vw, 1.4rem);
+  min-width: max-content;
+}
+
+/* In the stacked mobile menu the plate spans the menu instead. */
+@media (max-width: 900px) {
+  .nav__cta { min-width: 0; }
+}
+
+/* ---- 2. Strands band ----------------------------------------------------
+   A slim decorative aurora directly under the masthead. Purely ornamental:
+   it carries no content and never intercepts a click. */
+.strands-band {
+  position: relative;
+  width: 100%;
+  height: clamp(84px, 10vw, 150px);
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+}
+
+/* It hands off to the page ground at both ends so it never reads as a
+   pasted-on rectangle. */
+.strands-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--paper) 0%,
+    transparent 28%,
+    transparent 72%,
+    var(--paper) 100%
+  );
+}
+
+@media print {
+  .strands-band { display: none; }
+}

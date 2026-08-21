@@ -118,13 +118,76 @@
     "  return v;",
     "}",
     "",
-    /* Cover fit: crop the long axis, never letterbox. */
+    /* Cover fit: crop the long axis. Used ONLY for the blurred ground now. */
     "vec2 coverUv(vec2 uv, vec2 res, vec2 size) {",
     "  if (size.x < 1.0 || size.y < 1.0) return uv;",
     "  float rs = res.x / max(res.y, 1.0);",
     "  float ri = size.x / max(size.y, 1.0);",
     "  vec2 s = ri > rs ? vec2(rs / ri, 1.0) : vec2(1.0, ri / rs);",
     "  return (uv - 0.5) * s + 0.5;",
+    "}",
+    "",
+    /* Contain fit: the whole photograph, always. The sampled window is grown
+       instead of shrunk, so coordinates run outside 0..1 exactly where the
+       frame has space left over — that is what plateMask() then finds. */
+    "vec2 containUv(vec2 uv, vec2 res, vec2 size) {",
+    "  if (size.x < 1.0 || size.y < 1.0) return uv;",
+    "  float rs = res.x / max(res.y, 1.0);",
+    "  float ri = size.x / max(size.y, 1.0);",
+    "  vec2 s = ri > rs ? vec2(1.0, rs / ri) : vec2(ri / rs, 1.0);",
+    "  return (uv - 0.5) / s + 0.5;",
+    "}",
+    "",
+    /* 1 inside the contained photograph, 0 outside, with a couple of pixels of
+       feather between the two so the edge is a seam and not a cut. The scale
+       vector converts texture-space distance back into stage units, which is
+       what keeps the feather even on all four sides. */
+    "float plateMask(vec2 uv, vec2 res, vec2 size) {",
+    "  if (size.x < 1.0 || size.y < 1.0) return 1.0;",
+    "  float rs = res.x / max(res.y, 1.0);",
+    "  float ri = size.x / max(size.y, 1.0);",
+    "  vec2 s = ri > rs ? vec2(1.0, rs / ri) : vec2(ri / rs, 1.0);",
+    "  vec2 d = min(uv, vec2(1.0) - uv) * s;",
+    "  return smoothstep(0.0, 0.0045, min(d.x, d.y));",
+    "}",
+    "",
+    /* Tap spacing for the fake blur, in texture space. r is a stage-relative
+       radius; dividing x by the stage aspect and then folding in the cover
+       scale keeps the smear round on screen rather than stretched. */
+    "vec2 blurStep(vec2 res, vec2 size, float r) {",
+    "  float rs = res.x / max(res.y, 1.0);",
+    "  vec2 s = vec2(1.0);",
+    "  if (size.x >= 1.0 && size.y >= 1.0) {",
+    "    float ri = size.x / max(size.y, 1.0);",
+    "    s = ri > rs ? vec2(rs / ri, 1.0) : vec2(1.0, ri / rs);",
+    "  }",
+    "  return vec2(r / max(rs, 0.001), r) * s;",
+    "}",
+    "",
+    /* Nine fixed taps — a cross at full radius and an X at 0.62 of it. No
+       loop, no mip, no derivatives; it only has to read as out of focus. */
+    "vec3 blurred(sampler2D tex, vec2 uv, vec2 st) {",
+    "  vec2 d = st * 0.62;",
+    "  vec3 sum = texture2D(tex, clamp(uv, 0.0, 1.0)).rgb;",
+    "  sum += texture2D(tex, clamp(uv + vec2(st.x, 0.0), 0.0, 1.0)).rgb;",
+    "  sum += texture2D(tex, clamp(uv - vec2(st.x, 0.0), 0.0, 1.0)).rgb;",
+    "  sum += texture2D(tex, clamp(uv + vec2(0.0, st.y), 0.0, 1.0)).rgb;",
+    "  sum += texture2D(tex, clamp(uv - vec2(0.0, st.y), 0.0, 1.0)).rgb;",
+    "  sum += texture2D(tex, clamp(uv + vec2(d.x, d.y), 0.0, 1.0)).rgb;",
+    "  sum += texture2D(tex, clamp(uv - vec2(d.x, d.y), 0.0, 1.0)).rgb;",
+    "  sum += texture2D(tex, clamp(uv + vec2(d.x, -d.y), 0.0, 1.0)).rgb;",
+    "  sum += texture2D(tex, clamp(uv - vec2(d.x, -d.y), 0.0, 1.0)).rgb;",
+    "  return sum / 9.0;",
+    "}",
+    "",
+    /* Desaturate, dim towards the overlay colour, darken a shade: the ground
+       has to read as a soft plate the photograph sits on, never as a second
+       photograph competing with it. */
+    "vec3 ground(vec3 c) {",
+    "  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));",
+    "  vec3 g = mix(c, vec3(l), 0.55);",
+    "  g = mix(g, uOverlay, 0.62);",
+    "  return g * 0.94;",
     "}",
     "",
     "vec2 rotate(vec2 uv, float a) {",
@@ -180,10 +243,24 @@
     "  vec2 offA = offset * p + vec2(uDir * p * 0.05 * uDrift, 0.0);",
     "  vec2 offB = -offset * (1.0 - p) - vec2(uDir * (1.0 - p) * 0.05 * uDrift, 0.0);",
     "",
-    "  vec2 sampleA = coverUv(clamp(uvA + offA, -0.6, 1.6), uResolution, uCurrentSize);",
-    "  vec2 sampleB = coverUv(clamp(uvB + offB, -0.6, 1.6), uResolution, uNextSize);",
+    /* The displacement is applied in stage space and clamped first; both fits
+       are taken from that same displaced coordinate, so the photograph and its
+       ground melt, ripple, shear and swirl together. */
+    "  vec2 baseA = clamp(uvA + offA, -0.6, 1.6);",
+    "  vec2 baseB = clamp(uvB + offB, -0.6, 1.6);",
     "",
-    /* Chromatic aberration, strongest at the middle of the transition. */
+    "  vec2 sampleA = containUv(baseA, uResolution, uCurrentSize);",
+    "  vec2 sampleB = containUv(baseB, uResolution, uNextSize);",
+    "",
+    /* The ground is the same photograph, cover-fit and pushed in a further
+       1.14x so the blur taps never reach the clamped texture edge. */
+    "  vec2 bedA = (coverUv(baseA, uResolution, uCurrentSize) - 0.5) * 0.88 + 0.5;",
+    "  vec2 bedB = (coverUv(baseB, uResolution, uNextSize) - 0.5) * 0.88 + 0.5;",
+    "  vec3 bgA = ground(blurred(tCurrent, bedA, blurStep(uResolution, uCurrentSize, 0.038)));",
+    "  vec3 bgB = ground(blurred(tNext, bedB, blurStep(uResolution, uNextSize, 0.038)));",
+    "",
+    /* Chromatic aberration, strongest at the middle of the transition. It
+       rides the sharp photograph only; the ground stays clean. */
     "  float ab = uAberration * env * (1.0 - uReduce) * 0.012;",
     "  vec2 dirA = normalize(offA + vec2(1e-5));",
     "  vec2 dirB = normalize(offB + vec2(1e-5));",
@@ -192,11 +269,13 @@
     "  colA.r = texture2D(tCurrent, clamp(sampleA + dirA * ab, 0.0, 1.0)).r;",
     "  colA.g = texture2D(tCurrent, clamp(sampleA, 0.0, 1.0)).g;",
     "  colA.b = texture2D(tCurrent, clamp(sampleA - dirA * ab, 0.0, 1.0)).b;",
+    "  colA = mix(bgA, colA, plateMask(sampleA, uResolution, uCurrentSize));",
     "",
     "  vec3 colB;",
     "  colB.r = texture2D(tNext, clamp(sampleB + dirB * ab, 0.0, 1.0)).r;",
     "  colB.g = texture2D(tNext, clamp(sampleB, 0.0, 1.0)).g;",
     "  colB.b = texture2D(tNext, clamp(sampleB - dirB * ab, 0.0, 1.0)).b;",
+    "  colB = mix(bgB, colB, plateMask(sampleB, uResolution, uNextSize));",
     "",
     "  float mixer = smoothstep(0.0, 1.0, p);",
     "  vec3 col = mix(colA, colB, mixer);",
