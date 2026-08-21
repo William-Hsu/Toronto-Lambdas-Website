@@ -9,6 +9,11 @@
 
    The same rules dress the WebGL canvas and the plain-image fallback, so a
    machine without WebGL sees the identical layout, captions and controls.
+
+   Nothing here ever crops a photograph. The plate is contained inside the
+   frame — whole, every time, portrait or landscape — and the space left over
+   is filled by a blurred, dimmed copy of that same photograph. The shader does
+   exactly the same thing in GLSL; §3 is the fallback's half of the contract.
    ========================================================================== */
 
 /* ---- 1. Root ------------------------------------------------------------ */
@@ -56,22 +61,64 @@
 
 /* ---- 3. Fallback plates ------------------------------------------------- */
 /* Used when no WebGL context can be had, or when a texture upload is refused.
-   A plain crossfade, same indices, same controls. */
+   A plain crossfade, same indices, same controls — and the same fitting
+   contract as the shader: the WHOLE photograph, contained, over a blurred and
+   dimmed cover-fit copy of itself. Nothing is ever cropped, and the frame is
+   still full. Square corners throughout; the plate is never rounded. */
+.morph-slider__plate {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 620ms ease;
+  pointer-events: none;
+}
+
+.morph-slider__plate.is-current { opacity: 1; }
+
+/* The ground. Scaled past the frame so the blur's soft edge is cut off by the
+   stage rather than showing as a pale seam, and clipped by .morph-slider__stage
+   { overflow: hidden } — deliberately NOT clipped by the plate itself. */
+.morph-slider__bed {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: cover;
+  transform: scale(1.24);       /* > the blur radius on the short axis, so the
+                                   soft edge falls outside the stage entirely */
+  filter: blur(26px) saturate(.45) brightness(.78);
+  pointer-events: none;
+}
+
+/* Dims the ground towards the overlay colour, the same move the shader's
+   ground() makes. Inside the filtered box, so it blurs with it — it is a flat
+   wash, so that costs nothing and guarantees the two never separate. */
+.morph-slider__bed::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: var(--ms-overlay);
+  opacity: .55;
+}
+
 .morph-slider__img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 620ms ease;
+  object-fit: contain;
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
   pointer-events: none;
 }
 
-.morph-slider__img.is-current { opacity: 1; }
+/* An engine with no filter support still gets a ground rather than a second
+   photograph: lean harder on the tint. */
+@supports not (filter: blur(2px)) {
+  .morph-slider__bed::after { opacity: .82; }
+}
 
 /* ---- 4. Caption --------------------------------------------------------- */
 /* Sits on the photograph, so its ink is fixed light regardless of theme. */
@@ -201,7 +248,7 @@
 /* ---- 9. Reduced motion --------------------------------------------------- */
 /* The shader also receives uReduce = 1 and a much shorter duration. */
 @media (prefers-reduced-motion: reduce) {
-  .morph-slider__img { transition: opacity 120ms linear; }
+  .morph-slider__plate { transition: opacity 120ms linear; }
   .morph-slider__caption,
   .morph-slider__arrow,
   .morph-slider__dot::before { transition: none; }

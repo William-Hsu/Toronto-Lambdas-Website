@@ -1,0 +1,131 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   BlurText — styles for the vanilla port of the React Bits BlurText.
+   Scoped entirely to .blur-text*; restyles nothing that already exists.
+
+   Two things this file deliberately does NOT do. It never hides anything on
+   the bare .blur-text class — only .blur-text--armed hides, and the script
+   adds that at the moment it has actually split the element and mounted an
+   observer, so a page whose JS never runs (or throws) shows plain, fully
+   visible text. And it never touches the host's own opacity, transform or
+   filter: only the generated pieces move, so style.css's `.reveal { opacity:
+   1; transform: none }` can never be in a cascade fight with this, and a
+   future .reveal fade on an ancestor would compose with it rather than be
+   multiplied against it.
+
+   Colour is inherited outright — nothing here names a token, so the two
+   themes and the remapped palette inside .section--navy all just work.
+   ========================================================================== */
+
+/* ---- 1. Host ------------------------------------------------------------ */
+/* The six numbers the keyframes read. They are declared here so the file is
+   legible on its own; the script overwrites all six inline from its resolved
+   config, so these are the fallback, not the authority. The values are the
+   house-restrained ones: 10px of travel and 6px of blur, against the React
+   demo's 50px and 10px. */
+.blur-text {
+  --bt-blur: 6px;
+  --bt-blur-mid: 3px;
+  --bt-y0: -10px;      /* where a piece arrives from; +ve for direction:bottom */
+  --bt-y1: 2px;        /* the small overshoot at step 1                        */
+  --bt-step: 0.35s;    /* a piece runs for two of these                        */
+  --bt-ease: ease-out;
+}
+
+/* ---- 2. Pieces ---------------------------------------------------------- */
+/* inline-block, never flex: the pieces stay in the normal text flow so the
+   heading still wraps, still inherits its typography and still sits on the
+   same baseline grid. The reference's display:flex row would break all three.
+   line-height and vertical-align are pinned to the inherited values so the
+   box a piece occupies is exactly the box the bare word occupied. */
+.blur-text--armed .blur-text__piece {
+  display: inline-block;
+  line-height: inherit;
+  vertical-align: baseline;
+  opacity: 0;
+  filter: blur(var(--bt-blur));
+  transform: translate3d(0, var(--bt-y0), 0);
+}
+
+/* A word in "letters" mode is only a box, not a piece: it keeps the word from
+   breaking across a line while its characters animate individually. */
+.blur-text--armed .blur-text__group {
+  display: inline-block;
+  line-height: inherit;
+  vertical-align: baseline;
+}
+
+/* Past the piece cap the script re-parents the element's whole contents into
+   one block piece instead of splitting them, so a long paragraph fades as a
+   single unit rather than exploding into sixty animated spans. It is declared
+   after §2 on purpose — display:block must win over the inline-block above. */
+.blur-text--armed .blur-text__unit {
+  display: block;
+}
+
+/* ---- 3. The reveal ------------------------------------------------------ */
+/* Two steps, exactly the reference's shape: blurred, transparent and offset →
+   half-blurred, half-opaque, just past the mark → settled. Only opacity,
+   filter and transform are touched, so the whole thing stays on the
+   compositor. animation-delay is written inline, per piece, by the script.
+
+   filter creates a stacking context and a containing block for fixed
+   descendants — which is why it is confined to leaf pieces here and never
+   allowed onto the host, an ancestor, or anything above the page-level
+   [data-gradual-blur] overlay. */
+.blur-text.is-revealing .blur-text__piece {
+  will-change: opacity, filter, transform;
+  animation-name: blur-text-in;
+  animation-duration: calc(var(--bt-step) * 2);
+  animation-timing-function: var(--bt-ease, ease-out);
+  animation-fill-mode: both;
+}
+
+@keyframes blur-text-in {
+  0% {
+    opacity: 0;
+    filter: blur(var(--bt-blur));
+    transform: translate3d(0, var(--bt-y0), 0);
+  }
+  50% {
+    opacity: .5;
+    filter: blur(var(--bt-blur-mid));
+    transform: translate3d(0, var(--bt-y1), 0);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ---- 4. Reduced motion -------------------------------------------------- */
+/* The script never splits an element under reduced motion, so in practice
+   none of these selectors can match. This block exists for the two seams
+   where they could: a preference switched on mid-reveal, and a stylesheet
+   that outlives the script. In both cases the pieces must be plain, settled
+   text — never a half-played frame and never a blurred word left on screen. */
+@media (prefers-reduced-motion: reduce) {
+  .blur-text--armed .blur-text__piece,
+  .blur-text.is-revealing .blur-text__piece {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+}
+
+/* ---- 5. Print ----------------------------------------------------------- */
+/* This site's whole argument is that it is set as on a printed page, so on
+   actual paper the ink is simply there. */
+@media print {
+  .blur-text--armed .blur-text__piece,
+  .blur-text.is-revealing .blur-text__piece {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+}

@@ -85,6 +85,36 @@
   background: linear-gradient(to top, var(--footer-bg, var(--paper)) 0%, transparent 100%);
 }
 
+/* ---- The closing band on the ground tone --------------------------------
+   Where the section rhythm lands the closing call-to-action on the page
+   ground rather than on a plate, it keeps its rules and its centred setting
+   but is struck in ordinary page ink. */
+.cta-band--ground {
+  background: var(--paper);
+  color: var(--ink);
+}
+.cta-band--ground h2 { color: var(--navy-700); }
+.cta-band--ground p  { color: var(--ink-soft); }
+.cta-band--ground .btn--light {
+  color: var(--navy-700);
+  border-color: var(--navy-700);
+  background: transparent;
+}
+.cta-band--ground .btn--light:hover {
+  background: var(--fill-strong);
+  border-color: var(--fill-strong);
+  color: var(--ink-inverse);
+}
+.cta-band--ground .btn--outline-light {
+  color: var(--navy-700);
+  border-color: var(--line-2);
+}
+.cta-band--ground .btn--outline-light:hover {
+  background: transparent;
+  border-color: var(--navy-700);
+  color: var(--navy-700);
+}
+
 /* The photo band is a picture, not a plate: there the ground is blurred over
    the image rather than merely tinted, so the two grounds meet in focus. */
 .drift-wall-band {

@@ -12,7 +12,15 @@
 
    — fbm melt displacement, a ripple centred on the pointer, sliced shear,
    swirl rotation, chromatic aberration riding the transition envelope,
-   cover-fit UV maths and a vignette mixed towards the overlay colour.
+   and a vignette mixed towards the overlay colour.
+
+   FITTING, and the reason nothing is ever cropped: each plate is sampled
+   twice. Once contain-fit, which is the whole photograph and never loses an
+   edge; once cover-fit, blurred over nine taps and dimmed towards the overlay
+   colour, which fills whatever the frame has left over. The sharp plate is
+   composited over that ground on a feathered inside/outside test, so a
+   portrait photograph in a landscape frame reads as a photograph on a soft
+   plate rather than as a photograph with its head and feet cut off.
 
    CRITICAL, and the reason the section can never break: if a WebGL context
    cannot be had — or a texture upload is refused, which happens with file://
@@ -347,6 +355,17 @@
     ];
   }
 
+  /* Safe to drop inside url("…") in an inline style: percent-encode anything
+     that could close the string or the function, and drop line breaks.
+     encodeURIComponent is no use here — it leaves ( ) and ' alone. */
+  var CSS_ESCAPES = { '"': "%22", "'": "%27", "(": "%28", ")": "%29", "\\": "%5C" };
+
+  function cssUrl(src) {
+    return String(src == null ? "" : src)
+      .replace(/[\r\n]/g, "")
+      .replace(/["'()\\]/g, function (ch) { return CSS_ESCAPES[ch]; });
+  }
+
   function resolveImage(src) {
     var s = String(src == null ? "" : src).trim();
     if (!s) return "";
@@ -671,7 +690,9 @@
 
     /* ---- 5b. The plain-image fallback ------------------------------------ */
     /* Built either up front (no WebGL at all) or mid-flight (a refused
-       texture). Same indices, same controls, same captions. */
+       texture). Same indices, same controls, same captions — and the same
+       fitting contract as the shader: each plate is a contained <img>, showing
+       the whole photograph, over a blurred cover-fit copy of itself. */
     function buildFallback() {
       if (fallbackLayers) return;
       root.classList.add("morph-slider--fallback");
@@ -681,6 +702,18 @@
       /* Insert in item order and always beneath the caption. */
       var anchor = captionEl || null;
       for (var i = 0; i < n; i++) {
+        var plate = document.createElement("div");
+        plate.className = "morph-slider__plate";
+
+        /* The ground: the same file as the plate above it, so the two share one
+           request; CSS blurs, desaturates and dims it. Pointed at its photo
+           only once the plate is first shown, which keeps the <img loading>
+           policy above honest instead of quietly fetching the whole gallery. */
+        var bed = document.createElement("span");
+        bed.className = "morph-slider__bed";
+        bed.setAttribute("aria-hidden", "true");
+        plate.appendChild(bed);
+
         var img = document.createElement("img");
         img.className = "morph-slider__img";
         img.setAttribute("src", items[i].image);
@@ -688,20 +721,32 @@
         img.setAttribute("loading", i === 0 ? "eager" : "lazy");
         img.setAttribute("decoding", "async");
         img.setAttribute("draggable", "false");
-        if (i === current) img.classList.add("is-current");
-        if (anchor) stage.insertBefore(img, anchor);
-        else stage.appendChild(img);
-        fallbackLayers.push(img);
+        plate.appendChild(img);
+
+        if (i === current) plate.classList.add("is-current");
+        if (anchor) stage.insertBefore(plate, anchor);
+        else stage.appendChild(plate);
+        fallbackLayers.push({ plate: plate, bed: bed, img: img, ground: false });
       }
       paintFallback();
+    }
+
+    function fillGround(layer, index) {
+      if (!layer || layer.ground) return;
+      layer.ground = true;
+      layer.bed.style.backgroundImage = 'url("' + cssUrl(items[index].image) + '")';
     }
 
     function paintFallback() {
       if (!fallbackLayers) return;
       for (var i = 0; i < fallbackLayers.length; i++) {
-        if (i === current) fallbackLayers[i].classList.add("is-current");
-        else fallbackLayers[i].classList.remove("is-current");
-        fallbackLayers[i].setAttribute("alt", i === current ? items[i].alt : "");
+        if (i === current) {
+          fallbackLayers[i].plate.classList.add("is-current");
+          fillGround(fallbackLayers[i], i);
+        } else {
+          fallbackLayers[i].plate.classList.remove("is-current");
+        }
+        fallbackLayers[i].img.setAttribute("alt", i === current ? items[i].alt : "");
       }
     }
 
