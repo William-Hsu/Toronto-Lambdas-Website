@@ -27,19 +27,29 @@ window.LPHIE.galleries = {
      More archival scans are to be added here as they are dug out. */
   archive: [
     {
+      image: "assets/img/gallery/archive-house-2000s.jpg",
+      alt: "Archival photograph of the chapter outside a house in the mid-2000s",
+      caption: "The chapter, mid-2000s"
+    },
+    {
+      image: "assets/img/gallery/archive-shots-night.jpg",
+      alt: "Archival photograph of brothers at a chapter social",
+      caption: "A night out, mid-2000s"
+    },
+    {
       image: "assets/img/gallery/charter-class-throwback.jpg",
       alt: "Archival photograph of Alpha Xi brothers in the mid-2000s",
       caption: "Charter-class brothers, mid-2000s"
     },
     {
+      image: "assets/img/gallery/archive-go-live.jpg",
+      alt: "Archival photograph of three brothers at a chapter event",
+      caption: "Brothers out, early 2010s"
+    },
+    {
       image: "assets/img/gallery/alumni-homecoming.jpg",
       alt: "Alumni returning to the chapter for homecoming",
       caption: "Alumni homecoming"
-    },
-    {
-      image: "assets/img/gallery/alumni-banquet.jpg",
-      alt: "Actives and alumni together at the annual banquet",
-      caption: "Actives and alumni, annual banquet"
     }
   ],
 

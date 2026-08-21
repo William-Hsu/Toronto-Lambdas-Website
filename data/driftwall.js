@@ -38,5 +38,10 @@ window.LPHIE.driftWall = [
   { image: "alumni-homecoming.jpg",      title: "Alumni homecoming",        href: "alumni.html" },
   { image: "summer-in-the-city.jpg",     title: "Summer in the city",       href: "" },
   { image: "house-social.jpg",           title: "House social",             href: "" },
-  { image: "late-nights.jpg",            title: "Late nights",              href: "" }
+  { image: "late-nights.jpg",            title: "Late nights",              href: "" },
+  { image: "rooftop-pool.jpg",           title: "Rooftop, downtown",        href: "" },
+  { image: "sunset-formal.jpg",          title: "Sunset, formal night",     href: "" },
+  { image: "robes-night.jpg",            title: "Regalia",                  href: "" },
+  { image: "late-night-walk.jpg",        title: "Late-night walk",          href: "" },
+  { image: "archive-house-2000s.jpg",    title: "The chapter, mid-2000s",   href: "" }
 ];
