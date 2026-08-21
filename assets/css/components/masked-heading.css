@@ -169,3 +169,18 @@
   .masked-heading__measure { color: inherit; }
   .masked-heading__reveal { display: none; }
 }
+
+/* ---- 8. The dark impression ---------------------------------------------
+   A chapter photograph is dark-on-dark against the midnight ground: the
+   letterforms fill with shadow and the line all but disappears. On the dark
+   plate the photograph inside the letters is lifted and cooled toward
+   parchment so the words read as brightly as engraved gilt would, while the
+   light impression keeps the photograph exactly as shot. */
+[data-theme="dark"] .masked-heading__source {
+  filter: brightness(2.15) contrast(0.88) saturate(0.62);
+}
+
+/* The gradient fallback needs the same lift when no photograph is supplied. */
+[data-theme="dark"] .masked-heading__fill {
+  filter: brightness(1.9) saturate(0.8);
+}
