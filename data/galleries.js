@@ -23,16 +23,36 @@ window.LPHIE = window.LPHIE || {};
 window.LPHIE.galleries = {
 
   /* The chapter at large — used on about.html. */
+  /* The chapter's own record — the photographs that belong beside the history.
+     More archival scans are to be added here as they are dug out. */
+  archive: [
+    {
+      image: "assets/img/gallery/charter-class-throwback.jpg",
+      alt: "Archival photograph of Alpha Xi brothers in the mid-2000s",
+      caption: "Charter-class brothers, mid-2000s"
+    },
+    {
+      image: "assets/img/gallery/alumni-homecoming.jpg",
+      alt: "Alumni returning to the chapter for homecoming",
+      caption: "Alumni homecoming"
+    },
+    {
+      image: "assets/img/gallery/alumni-banquet.jpg",
+      alt: "Actives and alumni together at the annual banquet",
+      caption: "Actives and alumni, annual banquet"
+    }
+  ],
+
   about: [
+    {
+      image: "assets/img/gallery/summer-in-the-city.jpg",
+      alt: "Brothers downtown on a summer afternoon",
+      caption: "Summer in the city"
+    },
     {
       image: "assets/img/gallery/convention-weekend.jpg",
       alt: "Brothers gathered at a national convention weekend",
       caption: "Convention weekend, delegates of the chapter"
-    },
-    {
-      image: "assets/img/gallery/charter-class-throwback.jpg",
-      alt: "Archival photograph of the chapter's charter class",
-      caption: "Charter-class brothers, mid-2000s"
     },
     {
       image: "assets/img/gallery/interchapter-formal.jpg",
@@ -43,11 +63,6 @@ window.LPHIE.galleries = {
       image: "assets/img/gallery/reveal-night.jpg",
       alt: "New members revealed to the chapter at night",
       caption: "Reveal night"
-    },
-    {
-      image: "assets/img/gallery/summer-in-the-city.jpg",
-      alt: "Brothers downtown on a summer afternoon",
-      caption: "Summer in the city"
     }
   ],
 
