@@ -8,14 +8,24 @@
    reference's, line for line —
 
      uResolution uTime uSpeed uAmplitude uWaviness uThickness uGlow uTaper
-     uSpread uHueShift uIntensity uSaturation uOpacity uScale uCount
-     uColorCount uColors[]
+     uSpread uHueShift uIntensity uSaturation uOpacity uScale uStretch
+     uCount uColorCount uColors[]
 
    — one sine-composited wavy line per strand, brightness falling off as the
    square of an inverse distance, an envelope tapering the band towards the
    left and right edges, a palette sampled by a hue that walks with both the
    strand index and the horizontal position, then a tone map, a saturation
    mix, and premultiplied alpha over a transparent canvas.
+
+   ONE deliberate departure from the reference: the envelope. The reference's
+   cos(uv.x * PI * 1.3) is periodic — alive for half its period and dead for
+   the other half — which behind a full-bleed band means the aurora repeats as
+   evenly spaced blooms, one on a phone but three, five, seven of them as the
+   viewport widens, snapping to a new count mid-drag. Repetition is the
+   loudest thing that can sit behind formal type. Here the envelope is locked
+   to the two page edges instead (§2), so the band is always exactly one
+   aurora, brightest mid-page, dying to nothing at both ends, at every width
+   and with no jump as the window is dragged.
 
    The reference's optional glass lens pass is omitted deliberately: this house
    style is engraved, not lensed.
@@ -62,28 +72,38 @@
     spread: 1.0,          /* per-strand phase offset multiplier              */
     hueShift: 0,          /* 0..1, rotates the palette                       */
     intensity: 0.32,      /* 0..1; drives thickness, amplitude and gain      */
-    saturation: 1.0,      /* 1 = leave the tone-mapped colour alone          */
-    scale: 2.2,           /* reference zoom; see fitScale() for what fit does */
+    scale: 2.2,           /* reference zoom; see pushLook() for what fit does */
     fit: true             /* snap the zoom so the envelope dies at the edges */
   };
 
-  /* Theme-dependent light. On near-white paper the composite can only darken
-     the ground towards the strand's own colour, so a warm gilt stop would
-     bleach into the paper and vanish — the light palette is therefore the navy
-     family alone, read as blue ink on laid paper. On the blue-black ground the
-     opposite holds: gilt lifts off it cleanly, and one lit navy stop keeps the
-     band from reading as a single flat wash. Dark also runs a much lower glow,
-     because the tone map flattens a bright core towards white and gilt only
-     stays gilt while it is held in the linear part of the curve. */
+  /* Theme-dependent light. On near-white paper the composite can only pull the
+     ground towards the strand's own colour, so a warm gilt stop would bleach
+     into the paper and vanish; the light palette is therefore the navy family
+     alone, read as blue ink on laid paper. On the blue-black ground the
+     opposite holds — gilt lifts off it cleanly, and one lit navy stop keeps
+     the band from reading as a single flat wash.
+
+     Dark runs a far lower glow than light for one reason: the tone map
+     1 - exp(-col * uGlow) drives every channel towards 1 as it saturates, and
+     a bleached core is white, not gilt. Holding the dark core in the linear
+     part of that curve is what keeps warm colour in it, and the saturation
+     lift then puts back what the curve still takes out.
+
+     Measured over a 1440px band: light peaks at #CFE3F7 on #FBF9F3, alpha
+     0.30, under 10% luminance away from the paper; dark peaks at a warm grey
+     #52514D against a #141F35 navy trough on #0A0F1C. Fewer than one pixel in
+     twenty carries any visible ink at all. That is the intended dose. */
   var THEMES = {
     light: {
       colors: ["#1B3057", "#24406F", "#2C4C82"],   /* navy-700/600/500 */
       glow: 0.55,
-      opacity: 0.34
+      saturation: 1.20,
+      opacity: 0.38
     },
     dark: {
       colors: ["#24406F", "#C9B98E", "#D2C199"],   /* lit navy, gilt, pale gilt */
-      glow: 0.25,
+      glow: 0.11,
+      saturation: 1.50,
       opacity: 0.58
     }
   };
@@ -460,6 +480,7 @@
     var canvas = null;
     var renderer = null;
     var rafId = null;
+    var bootRaf = 0;
     var resizeTimer = 0;
     var running = false;
     var inView = false;
@@ -629,21 +650,31 @@
       e.preventDefault();
       stopLoop();
       if (renderer) { renderer.destroy(); renderer = null; }
-      if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      if (canvas) {
+        canvas.removeEventListener("webglcontextlost", onContextLost);
+        if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      }
       canvas = null;
+      sized = false;
     }
     if (canvas) canvas.addEventListener("webglcontextlost", onContextLost);
 
     /* ---- 5f. Boot -------------------------------------------------------- */
-    /* One frame is drawn immediately either way; under reduced motion it is
-       also the only frame there will ever be — a still engraving. */
+    /* Measuring the host draws the first frame with it; under reduced motion
+       that is the only frame there will ever be — a still engraving. */
     resize();
+    if (!sized) {
+      /* Mounted before the stylesheet landed, so the host has no height yet:
+         one deferred retry is enough, and the observers cover the rest. */
+      bootRaf = requestAnimationFrame(function () { bootRaf = 0; resize(); });
+    }
     if (!io) refreshLoop();
 
     return function destroy() {
       if (destroyed) return;
       destroyed = true;
       stopLoop();
+      if (bootRaf) { cancelAnimationFrame(bootRaf); bootRaf = 0; }
       if (resizeTimer) { window.clearTimeout(resizeTimer); resizeTimer = 0; }
       document.removeEventListener("visibilitychange", onVisibility);
       if (canvas) canvas.removeEventListener("webglcontextlost", onContextLost);

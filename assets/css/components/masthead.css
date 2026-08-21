@@ -22,33 +22,13 @@
 }
 
 /* ---- 2. Strands band ----------------------------------------------------
-   A slim decorative aurora directly under the masthead. Purely ornamental:
-   it carries no content and never intercepts a click. */
-.strands-band {
-  position: relative;
-  width: 100%;
-  height: clamp(84px, 10vw, 150px);
-  overflow: hidden;
-  pointer-events: none;
-  background: transparent;
-}
-
-/* It hands off to the page ground at both ends so it never reads as a
-   pasted-on rectangle. */
-.strands-band::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    var(--paper) 0%,
-    transparent 28%,
-    transparent 72%,
-    var(--paper) 100%
-  );
+   The aurora sits directly under the masthead. The component paints a
+   transparent, tapered canvas, so it needs no ground of its own — only room,
+   and a little air beneath it before the page proper starts. */
+.strands--masthead {
+  margin-bottom: clamp(0.5rem, 1.5vw, 1.25rem);
 }
 
 @media print {
-  .strands-band { display: none; }
+  .strands { display: none; }
 }
