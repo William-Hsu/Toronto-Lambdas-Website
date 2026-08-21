@@ -277,19 +277,20 @@
   border-block: none;
 }
 
-/* In the dark impression the bright strip fades in and out vertically
-   instead of cutting hard against the black ground. */
+/* In the dark impression there is no tape either. The marks are dark artwork,
+   so instead of a light band behind them they are knocked out to the page's
+   own parchment ink and flow straight across the ground — one monochrome
+   register, which suits the plate better than a strip of colour ever did. */
 [data-theme="dark"] .logoloop {
-  /* A blue tape in the dark impression — light enough that the dark
-     corporate marks still read. */
-  background: linear-gradient(
-    to bottom,
-    rgba(143, 163, 198, 0) 0%,
-    #8FA3C6 18%,
-    #8FA3C6 82%,
-    rgba(143, 163, 198, 0) 100%
-  );
-  --logoloop-fadeColorAuto: #8FA3C6;
+  background: transparent;
+  --logoloop-fadeColorAuto: var(--paper);
   border-block: none;
   padding-block: 1.6rem;
 }
+
+[data-theme="dark"] .logoloop__item img {
+  filter: brightness(0) invert(1);
+  opacity: 0.82;
+}
+
+[data-theme="dark"] .logoloop__item img:hover { opacity: 1; }
