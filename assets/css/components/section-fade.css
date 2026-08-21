@@ -19,6 +19,19 @@
 :root { --paper-2: var(--paper); }
 [data-theme="dark"] { --paper-2: var(--paper); }
 
+/* The two tones sit CLOSE together — the rhythm should be felt rather than
+   announced. The beige plate is pulled most of the way toward the white
+   ground, and the blue plate most of the way toward the black ground, so each
+   impression reads as one paper with a slight change of weight. */
+:root {
+  --plate-bg:  #F7F4EA;
+  --footer-bg: #F7F4EA;
+}
+[data-theme="dark"] {
+  --plate-bg:  #111B33;
+  --footer-bg: #0A0F1C;
+}
+
 .section--navy,
 .cta-band {
   position: relative;

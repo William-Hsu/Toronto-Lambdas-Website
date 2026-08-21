@@ -14,8 +14,8 @@
   overflow: hidden;
   /* One-family rule: the band is a beige plate in light mode... */
   background:
-    radial-gradient(120% 110% at 50% 0%, #F4F0E3 0%, #F0EBDC 72%),
-    #F0EBDC;
+    radial-gradient(120% 110% at 50% 0%, #FAF7EF 0%, #F7F4EA 72%),
+    #F7F4EA;
   border-block: 1px solid rgba(27, 48, 87, .14);
 }
 /* ...and a navy plate in dark mode. */
@@ -24,8 +24,8 @@
      plate: the black-to-blue transition off the hero. */
   background:
     linear-gradient(to bottom, #0A0F1C 0%, rgba(10, 15, 28, 0) 48%),
-    radial-gradient(120% 110% at 50% 0%, #1B3057 0%, #17294B 72%),
-    #17294B;
+    radial-gradient(120% 110% at 50% 0%, #16223D 0%, #111B33 72%),
+    #111B33;
   border-block: 1px solid rgba(255, 255, 255, .07);
 }
 
