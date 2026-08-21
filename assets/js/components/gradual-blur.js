@@ -168,7 +168,29 @@
       layers.push(layer);
     }
 
+    /* A fixed bottom overlay stands down as the reader reaches the end of
+       the page, so the footer is never permanently smeared. */
+    var onScroll = null;
+    if (cfg.target === "page" && cfg.position === "bottom") {
+      s.transition = "opacity 0.3s ease-out";
+      onScroll = function () {
+        var doc = document.documentElement;
+        var y = window.scrollY || window.pageYOffset || 0;
+        var remaining = doc.scrollHeight - y - window.innerHeight;
+        var span = Math.max(root.offsetHeight * 1.5, 120);
+        var t = Math.max(0, Math.min(1, remaining / span));
+        root.style.opacity = String(cfg.opacity * t);
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      onScroll();
+    }
+
     return function destroy() {
+      if (onScroll) {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+      }
       for (var k = 0; k < layers.length; k++) {
         if (layers[k].parentNode) layers[k].parentNode.removeChild(layers[k]);
       }

@@ -263,3 +263,29 @@
   .logoloop--scale-hover .logoloop__item:hover .logoloop__node,
   .logoloop--scale-hover .logoloop__item:hover .logoloop__wordmark { transform: none; }
 }
+
+/* ---- Bright strip -------------------------------------------------------
+   The employer marks are dark-on-light artwork; the strip stays bright in
+   BOTH themes so the names never sink into a dark ground. The edge fade is
+   pinned to the same bright tone. */
+.logoloop {
+  background: #FBF9F3;
+  --logoloop-fadeColorAuto: #FBF9F3;
+  padding-block: 1.1rem;
+  border-block: 1px solid rgba(27, 48, 87, .14);
+}
+
+/* In the dark impression the bright strip fades in and out vertically
+   instead of cutting hard against the black ground. */
+[data-theme="dark"] .logoloop {
+  background: linear-gradient(
+    to bottom,
+    rgba(241, 236, 222, 0) 0%,
+    #F1ECDE 18%,
+    #F1ECDE 82%,
+    rgba(241, 236, 222, 0) 100%
+  );
+  --logoloop-fadeColorAuto: #F1ECDE;
+  border-block: none;
+  padding-block: 1.6rem;
+}

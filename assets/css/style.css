@@ -30,10 +30,10 @@
   --navy-100: #DDE3EE;
 
   /* Paper & ink */
-  --white:    #FBF9F3;   /* nominal "white" — the lightest INK, used on plates */
-  --paper:    #F5F1E6;   /* page ground — laid, ivory */
-  --paper-2:  #EDE7D6;   /* deeper panel */
-  --surface:  #FBF9F3;   /* raised surface: form fields, plate mounts, mounts */
+  --white:    #FFFEFA;   /* nominal "white" — the lightest INK, used on plates */
+  --paper:    #FBF9F3;   /* page ground — near-white, the DOMINANT tone */
+  --paper-2:  #F0EBDC;   /* beige panel — the accent tone "around" */
+  --surface:  #FFFEFA;   /* raised surface: form fields, plate mounts, mounts */
   --line:     #D9CFB6;   /* aged hairline rule */
   --line-2:   #C4B896;   /* stronger rule */
   --ink:      #23201A;   /* body text — warm near-black */
@@ -99,8 +99,8 @@
 
   /* Paper & ink, inverted. */
   --white:    #F7F2E3;   /* the lightest ink — still warm, never pure white */
-  --paper:    #0E1D3A;   /* page ground — midnight stock, warm not black */
-  --paper-2:  #142647;   /* deeper panel → a LIGHTER navy in this impression */
+  --paper:    #0A0F1C;   /* page ground — blue-black, the DOMINANT tone */
+  --paper-2:  #0A0F1C;   /* panels merge into the ground; rules do the sectioning */
   --surface:  #16294C;   /* form fields, plate mounts, gallery mounts */
   --line:     rgba(231, 218, 182, .14);   /* hairline, translucent gilt-white */
   --line-2:   rgba(231, 218, 182, .28);   /* stronger rule */
@@ -124,14 +124,14 @@
    blue/black, letters white/beige. The old navy plates keep their section
    rhythm but render as tone variations of the theme's own family. */
 :root {
-  --plate-bg:        #FBF9F3;                 /* light plate: warm near-white   */
+  --plate-bg:        #F0EBDC;                 /* light plate: beige on the white ground */
   --plate-ink:       #4C463A;                 /* plate body ink                 */
   --plate-head:      #1B3057;                 /* plate headings                 */
   --plate-accent:    #24406F;                 /* plate accents, engraved navy   */
   --plate-onaccent:  #FBF9F3;                 /* ink atop accent fills          */
   --plate-line:      rgba(27, 48, 87, .4);    /* hairlines on the plate         */
   --plate-hover:     rgba(27, 48, 87, .08);
-  --footer-bg:       #EDE7D6;
+  --footer-bg:       #F0EBDC;
   --footer-ink:      #4C463A;
   --footer-head:     #1B3057;
   --footer-mute:     #7C7360;
@@ -144,7 +144,7 @@
   --plate-onaccent:  #0C1B38;
   --plate-line:      rgba(201, 185, 142, .45);
   --plate-hover:     rgba(255, 255, 255, .1);
-  --footer-bg:       #08142B;
+  --footer-bg:       #0A0F1C;
   --footer-ink:      #CFC4A6;
   --footer-head:     #F7F2E3;
   --footer-mute:     #9C917A;
@@ -435,7 +435,7 @@ hr::before {
   gap: var(--sp-2);
 }
 .hero--home .hero__crest {
-  width: min(150px, 34%);
+  width: min(200px, 42%);
   margin-bottom: var(--sp-2);
 }
 .hero--home .eyebrow { margin-bottom: var(--sp-1); }
@@ -444,14 +444,14 @@ hr::before {
   margin: 0 0 var(--sp-1);
 }
 .hero--home .hero__title {
-  font-size: clamp(2.2rem, 4.9vw, 3.35rem);
+  font-size: clamp(2.5rem, 5.8vw, 4.3rem);
   line-height: 1.03;
   margin: var(--sp-1) 0 var(--sp-2);
 }
 .hero--home .hero__sub {
-  font-size: clamp(1.12rem, 1.6vw, 1.32rem);
+  font-size: clamp(1.15rem, 1.7vw, 1.42rem);
   line-height: 1.55;
-  max-width: 76ch;
+  max-width: 82ch;
   margin: 0 auto var(--sp-3);
 }
 .hero--home .ornament { margin: var(--sp-1) 0; }

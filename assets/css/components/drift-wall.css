@@ -14,15 +14,18 @@
   overflow: hidden;
   /* One-family rule: the band is a beige plate in light mode... */
   background:
-    radial-gradient(120% 110% at 50% 0%, #F0EADB 0%, #E4DCC5 72%),
-    #E4DCC5;
+    radial-gradient(120% 110% at 50% 0%, #F4F0E3 0%, #F0EBDC 72%),
+    #F0EBDC;
   border-block: 1px solid rgba(27, 48, 87, .14);
 }
 /* ...and a navy plate in dark mode. */
 [data-theme="dark"] .drift-wall-band {
+  /* Black bleeds over the start of the photos, then hands off to the blue
+     plate: the black-to-blue transition off the hero. */
   background:
-    radial-gradient(120% 110% at 50% 0%, #0B1E52 0%, #061539 72%),
-    #061539;
+    linear-gradient(to bottom, #0A0F1C 0%, rgba(10, 15, 28, 0) 48%),
+    radial-gradient(120% 110% at 50% 0%, #1B3057 0%, #17294B 72%),
+    #17294B;
   border-block: 1px solid rgba(255, 255, 255, .07);
 }
 
@@ -57,7 +60,7 @@
   mask-composite: intersect;
 }
 
-[data-theme="dark"] .drift-wall { --dw-overlay: #061539; }
+[data-theme="dark"] .drift-wall { --dw-overlay: #0A0F1C; }
 
 /* ---- 3. Plane, columns, tracks ----------------------------------------- */
 .drift-wall__plane {
