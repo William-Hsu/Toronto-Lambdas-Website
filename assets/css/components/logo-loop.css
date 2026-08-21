@@ -269,23 +269,27 @@
    BOTH themes so the names never sink into a dark ground. The edge fade is
    pinned to the same bright tone. */
 .logoloop {
-  background: #FBF9F3;
-  --logoloop-fadeColorAuto: #FBF9F3;
+  /* Light impression: no tape at all — the marks simply flow across the
+     section's own ground. The dark impression adds a blue tape below. */
+  background: transparent;
+  --logoloop-fadeColorAuto: var(--paper-2, #F0EBDC);
   padding-block: 1.1rem;
-  border-block: 1px solid rgba(27, 48, 87, .14);
+  border-block: none;
 }
 
 /* In the dark impression the bright strip fades in and out vertically
    instead of cutting hard against the black ground. */
 [data-theme="dark"] .logoloop {
+  /* A blue tape in the dark impression — light enough that the dark
+     corporate marks still read. */
   background: linear-gradient(
     to bottom,
-    rgba(241, 236, 222, 0) 0%,
-    #F1ECDE 18%,
-    #F1ECDE 82%,
-    rgba(241, 236, 222, 0) 100%
+    rgba(199, 210, 230, 0) 0%,
+    #C7D2E6 18%,
+    #C7D2E6 82%,
+    rgba(199, 210, 230, 0) 100%
   );
-  --logoloop-fadeColorAuto: #F1ECDE;
+  --logoloop-fadeColorAuto: #C7D2E6;
   border-block: none;
   padding-block: 1.6rem;
 }
