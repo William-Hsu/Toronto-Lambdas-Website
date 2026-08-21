@@ -1,0 +1,154 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   Section fade — the seam between a toned plate and the page ground is a
+   soft gradient instead of a hard cut. The plate keeps its own colour in the
+   middle and dissolves into the ground at both ends, so the page reads as one
+   continuous sheet whose tone drifts, rather than as stacked bands.
+
+   Token-driven: the fade is always the CURRENT theme's ground colour, so it
+   works unchanged in both impressions. Self-contained — styles nothing but
+   .section--navy / .cta-band and their own pseudo-elements.
+   ========================================================================== */
+
+/* Exactly TWO tones per impression. The old "deeper panel" token had drifted
+   to the same value as the plate, so a plate could sit against a panel and
+   read as one flat field. It now collapses into the ground: the ground and
+   the plate are the only two tones, and they must alternate.
+   (Consolidate these into style.css's token blocks once nothing else is
+   editing that file.) */
+:root { --paper-2: var(--paper); }
+[data-theme="dark"] { --paper-2: var(--paper); }
+
+/* The two tones sit CLOSE together — the rhythm should be felt rather than
+   announced. The beige plate is pulled most of the way toward the white
+   ground, and the blue plate most of the way toward the black ground, so each
+   impression reads as one paper with a slight change of weight. */
+:root {
+  --plate-bg:  #F7F4EA;
+  --footer-bg: #F7F4EA;
+}
+[data-theme="dark"] {
+  --plate-bg:  #111B33;
+  --footer-bg: #0A0F1C;
+}
+
+.section--navy,
+.cta-band {
+  position: relative;
+  /* The engraved rule STAYS — it is the seam. The gradient simply softens the
+     colour on either side of it, so the divider reads as a line with a halo
+     rather than as a hard colour cut. */
+}
+
+/* A page header may take the plate tone. Some pages hold an odd number of
+   flexible sections between two fixed bands, and a strict alternation is only
+   possible if the header starts on the other tone. .page-head declares its own
+   background later in style.css, so these overrides need the double class. */
+.page-head.section--navy {
+  background: var(--plate-bg);
+  color: var(--plate-ink);
+  border-bottom: 3px double var(--plate-accent);
+}
+.page-head.section--navy h1 { color: var(--plate-head); }
+.page-head.section--navy p  { color: var(--plate-ink); }
+.page-head.section--navy .breadcrumb,
+.page-head.section--navy .breadcrumb a { color: var(--plate-accent); }
+.page-head.section--navy .breadcrumb a:hover { color: var(--plate-head); }
+.page-head.section--navy .btn--light,
+.page-head.section--navy .btn--outline-light { color: var(--plate-head); border-color: var(--plate-accent); }
+.page-head.section--navy .btn--light:hover { background: var(--plate-accent); border-color: var(--plate-accent); color: var(--plate-onaccent); }
+.page-head.section--navy .btn--outline-light:hover { background: var(--plate-hover); border-color: var(--plate-head); }
+
+/* The two dissolving ends. Depth scales with the viewport so the transition
+   stays proportional on a phone and on a wide desktop. */
+.section--navy::before,
+.section--navy::after,
+.cta-band::before,
+.cta-band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: clamp(40px, 6vw, 96px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.section--navy::before,
+.cta-band::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--paper) 0%, transparent 100%);
+}
+
+.section--navy::after,
+.cta-band::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--paper) 0%, transparent 100%);
+}
+
+/* Content rides above the fade. */
+.section--navy > *,
+.cta-band > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* A plate that ends the page hands off to the footer, not to the ground. */
+.cta-band::after {
+  background: linear-gradient(to top, var(--footer-bg, var(--paper)) 0%, transparent 100%);
+}
+
+/* ---- The closing band on the ground tone --------------------------------
+   Where the section rhythm lands the closing call-to-action on the page
+   ground rather than on a plate, it keeps its rules and its centred setting
+   but is struck in ordinary page ink. */
+.cta-band--ground {
+  background: var(--paper);
+  color: var(--ink);
+}
+.cta-band--ground h2 { color: var(--navy-700); }
+.cta-band--ground p  { color: var(--ink-soft); }
+.cta-band--ground .btn--light {
+  color: var(--navy-700);
+  border-color: var(--navy-700);
+  background: transparent;
+}
+.cta-band--ground .btn--light:hover {
+  background: var(--fill-strong);
+  border-color: var(--fill-strong);
+  color: var(--ink-inverse);
+}
+.cta-band--ground .btn--outline-light {
+  color: var(--navy-700);
+  border-color: var(--line-2);
+}
+.cta-band--ground .btn--outline-light:hover {
+  background: transparent;
+  border-color: var(--navy-700);
+  color: var(--navy-700);
+}
+
+/* The photo band is a picture, not a plate: there the ground is blurred over
+   the image rather than merely tinted, so the two grounds meet in focus. */
+.drift-wall-band {
+  position: relative;
+}
+
+.drift-wall-band::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: clamp(36px, 5vw, 80px);
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(to top, var(--paper) 0%, transparent 100%);
+}
+
+@media print {
+  .section--navy::before,
+  .section--navy::after,
+  .cta-band::before,
+  .cta-band::after,
+  .drift-wall-band::after { display: none; }
+}

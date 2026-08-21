@@ -1,14 +1,32 @@
 <!DOCTYPE html>
-<html lang="en" data-root="">
+<html lang="en" data-root="" data-blur-text-targets=".hero__inner, .page-head__inner, .section > .wrap, .cta-band > .wrap">
 <head>
 <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <script>
+      /* Pre-paint the chosen impression before any CSS lands, so the page
+         never flashes the wrong theme. Mirrors assets/js/theme.js. */
+      (function () {
+        try {
+          var t = localStorage.getItem("lphie-theme");
+          /* Dark is the default impression; only a stored choice overrides it. */
+          if (t !== "light" && t !== "dark") { t = "dark"; }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <script src="assets/js/theme.js" defer></script>
     <meta name="theme-color" content="#12296B">
     <link rel="icon" href="assets/img/crest-navy.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/components/morph-slider.css">
+    <link rel="stylesheet" href="assets/css/components/section-fade.css">
+    <link rel="stylesheet" href="assets/css/components/masthead.css">
+    <link rel="stylesheet" href="assets/css/components/blur-text.css">
   <title>Alumni & Career Network · ΛΦΕ Alpha Xi</title>
   <meta name="description" content="Alumni of the Alpha Xi Chapter of Lambda Phi Epsilon at the University of Toronto · spotlights, sectors, academics and how alumni can reconnect.">
   <meta property="og:title" content="Alumni & Career Network · ΛΦΕ Alpha Xi">
@@ -33,10 +51,11 @@
       </div></div>
     </section>
 
-    <section class="section">
+
+    <section class="section section--navy">
       <div class="wrap">
         <div class="grid grid--2" style="gap:3rem; align-items:center">
-          <div>
+          <div class="reveal">
             <p class="eyebrow">The network</p>
             <h2>The part that pays off after graduation</h2>
             <p class="lede">
@@ -50,6 +69,9 @@
               Europe, with formal professional development and scholarship programming run at the international level.
             </p>
           </div>
+          <div class="reveal"><div data-morph-slider='{"gallery": "alumni", "transition": "melt", "duration": 1.1, "intensity": 0.55, "autoplay": true, "autoplayDelay": 5200, "overlayColor": "#0C1B38", "label": "Alumni"}'></div></div>
+        </div>
+        <div class="mt-6">
           <div class="stats stats--quad">
             <div class="stat"><div class="stat__value" data-fill="yearsActive">21</div><div class="stat__label">Years of Alpha Xi alumni</div></div>
             <div class="stat"><div class="stat__value" data-fill="lifetimeMembers">100,000+</div><div class="stat__label">Lifetime members</div></div>
@@ -60,7 +82,7 @@
       </div>
     </section>
 
-    <section class="section section--paper">
+    <section class="section">
       <div class="wrap">
         <p class="eyebrow">Alumni spotlight</p>
         <h2>Where brothers have gone</h2>
@@ -70,7 +92,7 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section section--navy">
       <div class="wrap">
         <p class="eyebrow">Sectors</p>
         <h2>Fields our alumni work in</h2>
@@ -78,7 +100,7 @@
       </div>
     </section>
 
-    <section class="section section--navy">
+    <section class="section">
       <div class="wrap">
         <div class="grid grid--2" style="gap:3rem">
           <div>
@@ -116,6 +138,9 @@
   <script src="data/roster.js"></script>
   <script src="data/alumni.js"></script>
   <script src="data/content.js"></script>
+  <script src="data/galleries.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/components/morph-slider.js"></script>
+  <script src="assets/js/components/blur-text.js"></script>
 </body>
 </html>

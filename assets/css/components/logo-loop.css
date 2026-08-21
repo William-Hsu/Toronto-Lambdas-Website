@@ -1,0 +1,296 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   LogoLoop — vanilla port of the React Bits component of the same name.
+   Structural CSS is the reference's; only the palette is the chapter's.
+   Self-contained: every selector below is namespaced .logoloop*.
+   ========================================================================== */
+
+.logoloop {
+  position: relative;
+  overflow: hidden;
+
+  --logoloop-gap: 68px;
+  --logoloop-logoHeight: 30px;
+  /* The band sits on the paper section, so the edge fade defaults to --paper.
+     Override per-instance with the fadeOutColor option, which sets
+     --logoloop-fadeColor inline. */
+  --logoloop-fadeColorAuto: var(--paper, #FAFBFD);
+  --logoloop-wordmark-color: var(--navy-700, #12296B);
+}
+
+.logoloop--vertical {
+  height: 100%;
+  display: inline-block;
+}
+
+.logoloop--scale-hover {
+  padding-top: calc(var(--logoloop-logoHeight) * 0.1);
+  padding-bottom: calc(var(--logoloop-logoHeight) * 0.1);
+}
+
+/* ---- Track + lists ------------------------------------------------------ */
+
+.logoloop__track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+  z-index: 0;
+}
+
+.logoloop--vertical .logoloop__track {
+  flex-direction: column;
+  height: max-content;
+  width: 100%;
+}
+
+.logoloop__list {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.logoloop--vertical .logoloop__list { flex-direction: column; }
+
+.logoloop__item {
+  flex: 0 0 auto;
+  margin-right: var(--logoloop-gap);
+  margin-bottom: 0;   /* the site's global `li` margin must not enter the strip */
+  font-size: var(--logoloop-logoHeight);
+  line-height: 1;
+}
+
+.logoloop--vertical .logoloop__item { margin-right: 0; margin-bottom: var(--logoloop-gap); }
+.logoloop__item:last-child { margin-right: var(--logoloop-gap); }
+.logoloop--vertical .logoloop__item:last-child { margin-right: 0; margin-bottom: var(--logoloop-gap); }
+
+.logoloop__node { display: inline-flex; align-items: center; }
+
+.logoloop__item img {
+  height: var(--logoloop-logoHeight);
+  width: auto;
+  max-width: none;   /* overrides the site's global `img { max-width: 100% }` */
+  display: block;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- Typographic wordmark (used until a real logo file is supplied) ------
+   Boxed to the same height a logo would occupy so mixed rows keep one optical
+   baseline, and set in three sizes so a two-letter mark and a four-word one
+   carry the same visual weight. */
+
+.logoloop__wordmark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--logoloop-logoHeight);
+  min-width: calc(var(--logoloop-logoHeight) * 1.5);
+  white-space: nowrap;
+  font-family: var(--font-body, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  font-size: calc(var(--logoloop-logoHeight) * 0.46);
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.155em;
+  /* letter-spacing adds a trailing gap after the last glyph; the matching
+     indent puts the string back on the optical centre. */
+  text-indent: 0.155em;
+  color: var(--logoloop-wordmark-color);
+  opacity: 0.66;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* "TD", "EY", "BMO", "PwC", "AMD", "KPMG", "Onex", "Bell" */
+.logoloop__wordmark--short {
+  font-size: calc(var(--logoloop-logoHeight) * 0.56);
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  min-width: calc(var(--logoloop-logoHeight) * 1.7);
+}
+
+/* "JPMorgan Chase & Co.", "Purpose Investments" */
+.logoloop__wordmark--long {
+  font-size: calc(var(--logoloop-logoHeight) * 0.4);
+  letter-spacing: 0.12em;
+  text-indent: 0.12em;
+}
+
+/* Unidentified entry in data/logos.js — visibly a placeholder, quietly. */
+.logoloop__wordmark--todo {
+  padding: 0 0.75em;
+  border: 1px dashed var(--navy-200, #C6D2F2);
+  border-radius: var(--radius, 4px);
+  color: var(--ink-mute, #78829E);
+  opacity: 0.55;
+}
+
+/* ---- Hover ------------------------------------------------------------- */
+
+.logoloop--scale-hover .logoloop__item { overflow: visible; }
+
+.logoloop--scale-hover .logoloop__item:hover img,
+.logoloop--scale-hover .logoloop__item:hover .logoloop__node {
+  transform: scale(1.2);
+  transform-origin: center center;
+}
+
+/* Type reads larger than a mark at the same scale, so wordmarks lift less
+   and gain their colour back instead. */
+.logoloop--scale-hover .logoloop__item:hover .logoloop__wordmark {
+  transform: scale(1.12);
+  transform-origin: center center;
+  opacity: 1;
+  color: var(--navy-700, #12296B);
+}
+
+.logoloop--scale-hover .logoloop__node,
+.logoloop--scale-hover .logoloop__wordmark {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logoloop__link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  border-radius: var(--radius, 4px);
+  transition: opacity 0.2s ease;
+}
+
+.logoloop__link:hover { opacity: 0.8; }
+.logoloop__link:focus-visible { outline: 2px solid var(--navy-500, #2A50B4); outline-offset: 2px; }
+
+/* ---- Edge fade --------------------------------------------------------- */
+
+.logoloop--fade::before,
+.logoloop--fade::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(24px, 8%, 120px);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.logoloop--fade::before {
+  left: 0;
+  background: linear-gradient(to right, var(--logoloop-fadeColor, var(--logoloop-fadeColorAuto)) 0%, rgba(250, 251, 253, 0) 100%);
+}
+
+.logoloop--fade::after {
+  right: 0;
+  background: linear-gradient(to left, var(--logoloop-fadeColor, var(--logoloop-fadeColorAuto)) 0%, rgba(250, 251, 253, 0) 100%);
+}
+
+.logoloop--vertical.logoloop--fade::before,
+.logoloop--vertical.logoloop--fade::after {
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: clamp(24px, 8%, 120px);
+}
+
+.logoloop--vertical.logoloop--fade::before {
+  top: 0;
+  bottom: auto;
+  background: linear-gradient(to bottom, var(--logoloop-fadeColor, var(--logoloop-fadeColorAuto)) 0%, rgba(250, 251, 253, 0) 100%);
+}
+
+.logoloop--vertical.logoloop--fade::after {
+  bottom: 0;
+  top: auto;
+  background: linear-gradient(to top, var(--logoloop-fadeColor, var(--logoloop-fadeColorAuto)) 0%, rgba(250, 251, 253, 0) 100%);
+}
+
+/* ---- Reduced motion -----------------------------------------------------
+   The reference simply freezes the track, which leaves the strip clipped
+   mid-item. Instead the single visible sequence wraps into a centred static
+   row so every company is readable with no motion at all. The JS drops the
+   copy count to 1 as well; the aria-hidden rule below covers the case where
+   the preference flips before the JS notices. */
+
+@media (prefers-reduced-motion: reduce) {
+  .logoloop {
+    overflow: visible;
+    height: auto !important;
+  }
+
+  .logoloop__track {
+    transform: translate3d(0, 0, 0) !important;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    will-change: auto;
+  }
+
+  .logoloop__list {
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .logoloop__list[aria-hidden="true"] { display: none; }
+
+  .logoloop__item,
+  .logoloop--vertical .logoloop__item,
+  .logoloop__item:last-child,
+  .logoloop--vertical .logoloop__item:last-child {
+    margin: calc(var(--logoloop-gap) * 0.22) calc(var(--logoloop-gap) * 0.5);
+  }
+
+  .logoloop--fade::before,
+  .logoloop--fade::after { display: none; }
+
+  .logoloop__item img,
+  .logoloop__node,
+  .logoloop__wordmark { transition: none !important; }
+
+  .logoloop--scale-hover .logoloop__item:hover img,
+  .logoloop--scale-hover .logoloop__item:hover .logoloop__node,
+  .logoloop--scale-hover .logoloop__item:hover .logoloop__wordmark { transform: none; }
+}
+
+/* ---- Bright strip -------------------------------------------------------
+   The employer marks are dark-on-light artwork; the strip stays bright in
+   BOTH themes so the names never sink into a dark ground. The edge fade is
+   pinned to the same bright tone. */
+.logoloop {
+  /* Light impression: no tape at all — the marks simply flow across the
+     section's own ground. The dark impression adds a blue tape below. */
+  background: transparent;
+  --logoloop-fadeColorAuto: var(--paper-2, #F0EBDC);
+  padding-block: 1.1rem;
+  border-block: none;
+}
+
+/* In the dark impression there is no tape either. The marks are dark artwork,
+   so instead of a light band behind them they are knocked out to the page's
+   own parchment ink and flow straight across the ground — one monochrome
+   register, which suits the plate better than a strip of colour ever did. */
+[data-theme="dark"] .logoloop {
+  background: transparent;
+  --logoloop-fadeColorAuto: var(--paper);
+  border-block: none;
+  padding-block: 1.6rem;
+}
+
+[data-theme="dark"] .logoloop__item img {
+  filter: brightness(0) invert(1);
+  opacity: 0.82;
+}
+
+[data-theme="dark"] .logoloop__item img:hover { opacity: 1; }

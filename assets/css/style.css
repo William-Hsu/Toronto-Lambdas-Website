@@ -10,7 +10,14 @@
    ========================================================================== */
 
 /* ---------- 1. Tokens ---------------------------------------------------- */
+/* Two impressions of the same plate:
+   LIGHT — blue ink on laid ivory paper.
+   DARK  — gilt and warm paper-white on midnight stock.
+   Every colour below is a token. Nothing outside this block hardcodes a hue
+   except the two ink-on-navy rules that are navy in BOTH impressions. */
 :root {
+  color-scheme: light;
+
   /* Brand — Royal Blue & White, set as ink on paper. */
   --navy-900: #0C1B38;   /* footer / deepest plate */
   --navy-800: #112445;
@@ -23,17 +30,27 @@
   --navy-100: #DDE3EE;
 
   /* Paper & ink */
-  --white:    #FBF9F3;   /* nominal "white" is warm */
-  --paper:    #F5F1E6;   /* page ground — laid, ivory */
-  --paper-2:  #EDE7D6;   /* deeper panel */
+  --white:    #FFFEFA;   /* nominal "white" — the lightest INK, used on plates */
+  --paper:    #FBF9F3;   /* page ground — near-white, the DOMINANT tone */
+  --paper-2:  #F0EBDC;   /* beige panel — the accent tone "around" */
+  --surface:  #FFFEFA;   /* raised surface: form fields, plate mounts, mounts */
   --line:     #D9CFB6;   /* aged hairline rule */
   --line-2:   #C4B896;   /* stronger rule */
   --ink:      #23201A;   /* body text — warm near-black */
   --ink-soft: #4C463A;
   --ink-mute: #7C7360;
 
+  /* Solid fills that carry inverse ink (primary button, skip link, nav CTA). */
+  --fill-strong:       var(--navy-700);
+  --fill-strong-hover: var(--navy-900);
+  --ink-inverse:       var(--white);
+
   --accent:      var(--navy-700);
   --accent-dark: #C9B98E;   /* warm rule/mark on navy plates */
+
+  /* Rose used only by the editor "TODO" tag. */
+  --todo-line: #B9536A;
+  --todo-ink:  #9A2540;
 
   /* Type — one old-style serif does all the work. */
   --font-display: "EB Garamond", "Cormorant Garamond", Georgia, "Times New Roman", serif;
@@ -60,6 +77,111 @@
   --ease: ease;
 }
 
+/* ---------- 1b. Dark impression ------------------------------------------
+   The scheme inverts: the ground becomes deep warm navy, the ink becomes
+   warm paper-white, and every rule/heading that was navy is struck in gilt.
+   Only the token values change — no component is restyled below except the
+   handful that use a navy token as a FILL rather than as ink. */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Navy scale re-cast: the deep end stays structural, the light end
+     becomes the gilt "ink" that headings, links and engraved caps use. */
+  --navy-900: #08142B;   /* footer / deepest plate — below the page ground */
+  --navy-800: #0B1A36;
+  --navy-plate: #17294B; /* navy panels, lifted off the ground */
+  --navy-700: #E7DAB6;   /* PRIMARY ink — headings, engraved caps, rules */
+  --navy-600: #D4C293;   /* links, eyebrows, ornaments, numerals */
+  --navy-500: #EFE4C4;   /* hover — brighter gilt */
+  --navy-400: #9C917A;   /* muted ink on the deepest plate */
+  --navy-200: #CFC4A6;   /* footer body ink */
+  --navy-100: #E6DFCB;   /* body ink on navy plates */
+
+  /* Paper & ink, inverted. */
+  --white:    #F7F2E3;   /* the lightest ink — still warm, never pure white */
+  --paper:    #0A0F1C;   /* page ground — blue-black, the DOMINANT tone */
+  --paper-2:  #0A0F1C;   /* panels merge into the ground; rules do the sectioning */
+  --surface:  #16294C;   /* form fields, plate mounts, gallery mounts */
+  --line:     rgba(231, 218, 182, .14);   /* hairline, translucent gilt-white */
+  --line-2:   rgba(231, 218, 182, .28);   /* stronger rule */
+  --ink:      #EDE7D6;   /* body text — warm paper */
+  --ink-soft: #D9CFB6;
+  --ink-mute: #A79C82;
+
+  --fill-strong:       var(--accent-dark);
+  --fill-strong-hover: #E4D4AC;
+  --ink-inverse:       #0C1B38;
+
+  --accent-dark: #D2C199;
+
+  --todo-line: #C4707F;
+  --todo-ink:  #E7A3AE;
+}
+
+/* ---------- 1c. Tone-variant plates --------------------------------------
+   Founder rule: each theme stays in ONE family. Light mode: every surface
+   is beige/white, letters black/blue. Dark mode: every surface is
+   blue/black, letters white/beige. The old navy plates keep their section
+   rhythm but render as tone variations of the theme's own family. */
+:root {
+  --plate-bg:        #F0EBDC;                 /* light plate: beige on the white ground */
+  --plate-ink:       #4C463A;                 /* plate body ink                 */
+  --plate-head:      #1B3057;                 /* plate headings                 */
+  --plate-accent:    #24406F;                 /* plate accents, engraved navy   */
+  --plate-onaccent:  #FBF9F3;                 /* ink atop accent fills          */
+  --plate-line:      rgba(27, 48, 87, .4);    /* hairlines on the plate         */
+  --plate-hover:     rgba(27, 48, 87, .08);
+  --footer-bg:       #F0EBDC;
+  --footer-ink:      #4C463A;
+  --footer-head:     #1B3057;
+  --footer-mute:     #7C7360;
+}
+[data-theme="dark"] {
+  --plate-bg:        #17294B;                 /* dark plate: lifted navy        */
+  --plate-ink:       #D9CFB6;
+  --plate-head:      #F7F2E3;
+  --plate-accent:    #D2C199;                 /* warm gilt                      */
+  --plate-onaccent:  #0C1B38;
+  --plate-line:      rgba(201, 185, 142, .45);
+  --plate-hover:     rgba(255, 255, 255, .1);
+  --footer-bg:       #0A0F1C;
+  --footer-ink:      #CFC4A6;
+  --footer-head:     #F7F2E3;
+  --footer-mute:     #9C917A;
+}
+
+/* Map the legacy plate custom-props onto the theme's plate palette. */
+.section--navy,
+.cta-band,
+.callout--strong {
+  --navy-plate:  var(--plate-bg);
+  --navy-100:    var(--plate-ink);
+  --navy-200:    var(--plate-ink);
+  --white:       var(--plate-head);
+  --accent-dark: var(--plate-accent);
+  --accent:      var(--plate-accent);
+  --navy-900:    var(--plate-onaccent);
+}
+.section--navy .eyebrow                 { border-top-color: var(--plate-line); }
+.section--navy .card                    { border-top-color: var(--plate-line); }
+.section--navy .btn--outline-light,
+.cta-band .btn--outline-light           { border-color: var(--plate-line); }
+.section--navy .btn--outline-light:hover,
+.cta-band .btn--outline-light:hover     { border-color: var(--plate-head); background: var(--plate-hover); }
+.section--navy .callout                 { background: var(--plate-hover); border-color: var(--plate-line); }
+.section--navy .dropcap::first-letter   { color: var(--plate-accent); }
+.section--navy a:not(.btn)              { color: var(--plate-ink); text-decoration-color: var(--plate-accent); }
+.section--navy a:not(.btn):hover        { color: var(--plate-head); }
+
+/* Footer follows the same one-family rule. */
+.site-footer {
+  --navy-900: var(--footer-bg);
+  --navy-200: var(--footer-ink);
+  --white:    var(--footer-head);
+  --navy-400: var(--footer-mute);
+}
+.site-footer .footer-bottom { border-top-color: var(--plate-line); }
+
 /* ---------- 2. Reset ----------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -76,6 +198,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 img, svg, video { max-width: 100%; height: auto; display: block; }
+::placeholder { color: var(--ink-mute); opacity: 1; }
 
 a { color: var(--navy-600); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:hover { color: var(--navy-700); }
@@ -120,7 +243,7 @@ hr::before {
   border-block: 3px double var(--accent-dark);
   --accent: var(--accent-dark);
 }
-.section--navy h2, .section--navy h3, .section--navy h4 { color: #fff; }
+.section--navy h2, .section--navy h3, .section--navy h4 { color: var(--white); }
 .section--paper { background: var(--paper-2); border-block: 1px solid var(--line-2); }
 
 .grid { display: grid; gap: var(--sp-6); }
@@ -132,7 +255,7 @@ hr::before {
 /* ---------- 4. Skip link ------------------------------------------------- */
 .skip {
   position: absolute; left: -9999px; top: 0; z-index: 999;
-  background: var(--navy-700); color: #fff; padding: var(--sp-3) var(--sp-4); font-weight: 600;
+  background: var(--fill-strong); color: var(--ink-inverse); padding: var(--sp-3) var(--sp-4); font-weight: 600;
 }
 .skip:focus { left: 0; }
 
@@ -168,16 +291,29 @@ hr::before {
 .nav__links a[aria-current="page"] { color: var(--navy-700); text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
 .nav__cta {
   margin-left: var(--sp-2); padding: var(--sp-2) var(--sp-4) !important;
-  border: 1px solid var(--navy-700) !important; color: var(--navy-700) !important;
+  border: 1px solid var(--fill-strong) !important; color: var(--fill-strong) !important;
   font-size: .72rem !important; letter-spacing: .16em; text-transform: uppercase; font-weight: 600 !important;
   text-decoration: none !important;
 }
-.nav__cta:hover { background: var(--navy-700) !important; color: #fff !important; }
+.nav__cta:hover { background: var(--fill-strong) !important; color: var(--ink-inverse) !important; }
 .nav__toggle {
   display: none; background: none; border: 1px solid var(--line-2);
   color: var(--navy-700); padding: var(--sp-2) var(--sp-3); cursor: pointer;
   font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
 }
+
+/* Theme switch — an engraved square mark, moon or sun, no rounding. */
+.nav__theme-item { display: flex; align-items: center; }
+.nav__theme {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.05rem; height: 2.05rem; padding: 0; margin-left: var(--sp-2);
+  background: transparent; border: 1px solid var(--line-2); border-radius: 0;
+  color: var(--navy-700); cursor: pointer; line-height: 1;
+  font-family: var(--font-display); font-size: 1.05rem;
+  transition: background .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease);
+}
+.nav__theme:hover { background: var(--fill-strong); border-color: var(--fill-strong); color: var(--ink-inverse); }
+.nav__theme-glyph { display: block; position: relative; top: -1px; }
 
 @media (max-width: 900px) {
   .nav__toggle { display: block; }
@@ -192,6 +328,16 @@ hr::before {
   .nav__links li:last-child { border-bottom: 0; }
   .nav__links a { padding: var(--sp-3) 0; font-size: .82rem; }
   .nav__cta { text-align: center; margin-left: 0; margin-top: var(--sp-3); }
+  .nav__theme-item { border-bottom: 0; }
+  .nav__theme {
+    width: 100%; height: auto; margin-left: 0; margin-top: var(--sp-3);
+    padding-block: var(--sp-3); gap: var(--sp-3);
+    font-size: .78rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
+  }
+  .nav__theme .visually-hidden {
+    position: static; width: auto; height: auto; margin: 0;
+    overflow: visible; clip: auto; white-space: normal;
+  }
 }
 
 /* ---------- 6. Buttons --------------------------------------------------- */
@@ -203,14 +349,14 @@ hr::before {
   text-decoration: none; cursor: pointer; text-align: center;
   transition: background .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease);
 }
-.btn--primary { background: var(--navy-700); color: #fff; border-color: var(--navy-700); }
-.btn--primary:hover { background: var(--navy-900); border-color: var(--navy-900); color: #fff; }
-.btn--ghost { border-color: var(--navy-700); color: var(--navy-700); background: transparent; }
-.btn--ghost:hover { background: var(--navy-700); color: #fff; }
-.btn--light { background: transparent; color: #fff; border-color: var(--accent-dark); }
+.btn--primary { background: var(--fill-strong); color: var(--ink-inverse); border-color: var(--fill-strong); }
+.btn--primary:hover { background: var(--fill-strong-hover); border-color: var(--fill-strong-hover); color: var(--ink-inverse); }
+.btn--ghost { border-color: var(--fill-strong); color: var(--fill-strong); background: transparent; }
+.btn--ghost:hover { background: var(--fill-strong); color: var(--ink-inverse); }
+.btn--light { background: transparent; color: var(--white); border-color: var(--accent-dark); }
 .btn--light:hover { background: var(--accent-dark); color: var(--navy-900); }
-.btn--outline-light { border-color: rgba(255,255,255,.5); color: #fff; }
-.btn--outline-light:hover { border-color: #fff; background: rgba(255,255,255,.1); color: #fff; }
+.btn--outline-light { border-color: rgba(255,255,255,.5); color: var(--white); }
+.btn--outline-light:hover { border-color: var(--white); background: rgba(255,255,255,.1); color: var(--white); }
 .btn-row { display: flex; flex-wrap: wrap; gap: var(--sp-4); }
 
 /* ---------- 7. Eyebrow / lede -------------------------------------------- */
@@ -279,6 +425,44 @@ hr::before {
 }
 .hero__band dd { margin: 0; font-family: var(--font-display); font-size: 1.7rem; color: var(--navy-700); }
 
+/* --- 8b. Home masthead — the same title page, set tighter ---------------
+   The home hero was running past a full viewport. Every vertical measure
+   below is scoped to .hero--home so interior page heroes are untouched.
+   Measured in-browser: 1115→660px at 1440w (-41%), 1033→625 at 1024w (-40%),
+   947→586 at 768w (-38%), 1024→701 at 390w (-32%). */
+.hero--home .hero__inner {
+  padding-block: clamp(1.35rem, 2.6vw, 2rem);
+  gap: var(--sp-2);
+}
+.hero--home .hero__crest {
+  width: min(200px, 42%);
+  margin-bottom: var(--sp-2);
+}
+.hero--home .eyebrow { margin-bottom: var(--sp-1); }
+.hero--home .hero__school {
+  font-size: clamp(1.2rem, 2.2vw, 1.7rem);
+  margin: 0 0 var(--sp-1);
+}
+.hero--home .hero__title {
+  font-size: clamp(2.5rem, 5.8vw, 4.3rem);
+  line-height: 1.03;
+  margin: var(--sp-1) 0 var(--sp-2);
+}
+.hero--home .hero__sub {
+  font-size: clamp(1.15rem, 1.7vw, 1.42rem);
+  line-height: 1.55;
+  max-width: 82ch;
+  margin: 0 auto var(--sp-3);
+}
+.hero--home .ornament { margin: var(--sp-1) 0; }
+.hero--home .btn-row { margin-top: var(--sp-1); gap: var(--sp-3); }
+.hero--home .hero__band {
+  margin-top: var(--sp-4);
+  padding-block: var(--sp-2);
+  gap: var(--sp-3) var(--sp-7);
+}
+.hero--home .hero__band dd { font-size: 1.35rem; }
+
 /* ---------- 9. Page header (interior pages) ------------------------------ */
 .page-head {
   background: var(--paper); color: var(--ink);
@@ -294,6 +478,11 @@ hr::before {
 }
 .breadcrumb a { color: var(--ink-mute); text-decoration: none; }
 .breadcrumb a:hover { color: var(--navy-700); }
+/* 404 sets plate buttons on a paper page-head — keep them ink, not cream. */
+.page-head .btn--light { color: var(--navy-700); border-color: var(--navy-700); }
+.page-head .btn--light:hover { background: var(--fill-strong); border-color: var(--fill-strong); color: var(--ink-inverse); }
+.page-head .btn--outline-light { color: var(--navy-700); border-color: var(--line-2); }
+.page-head .btn--outline-light:hover { background: transparent; border-color: var(--navy-700); color: var(--navy-700); }
 
 /* ---------- 10. Cards → text columns ------------------------------------- */
 /* No boxes, no shadows. A hairline top rule separates each column. */
@@ -316,7 +505,7 @@ hr::before {
   font-family: var(--font-display); font-size: 2.4rem; font-weight: 500; line-height: 1;
 }
 .section--navy .card { border-top-color: rgba(201,185,142,.45); color: var(--navy-100); }
-.section--navy .card h3 { color: #fff; }
+.section--navy .card h3 { color: var(--white); }
 .section--navy .card p { color: var(--navy-100); }
 .section--navy .card__icon,
 .section--navy .card__num { color: var(--accent-dark); }
@@ -351,7 +540,7 @@ hr::before {
 .roster-toolbar label { font-size: .72rem; font-weight: 600; color: var(--ink-mute); letter-spacing: .16em; text-transform: uppercase; }
 .roster-toolbar select, .roster-toolbar input {
   font-family: inherit; font-size: 1.05rem; padding: .5rem .7rem;
-  border: 1px solid var(--line-2); border-radius: 0; background: var(--white); color: var(--ink);
+  border: 1px solid var(--line-2); border-radius: 0; background: var(--surface); color: var(--ink);
 }
 .roster-toolbar input { min-width: 200px; flex: 1 1 200px; }
 .roster-count { margin-left: auto; font-size: .9rem; color: var(--ink-mute); font-style: italic; }
@@ -363,7 +552,10 @@ hr::before {
   display: grid; place-items: center; color: var(--accent-dark);
   font-family: var(--font-display); font-size: 2.6rem; letter-spacing: .04em; margin-top: var(--sp-4);
 }
-.brother__photo img { width: 100%; height: 100%; object-fit: cover; }
+/* Photographs fill their frame. The crop is taken from above centre, which is
+   where faces sit, so an upright source is trimmed at the feet rather than
+   through the head. */
+.brother__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 32%; }
 .brother__body { padding: var(--sp-4) 0 0; }
 .brother__name { font-family: var(--font-display); font-size: 1.35rem; color: var(--navy-700); margin: 0 0 2px; line-height: 1.2; }
 .brother__nick { font-size: .95rem; color: var(--ink-mute); font-style: italic; margin: 0 0 var(--sp-2); }
@@ -402,7 +594,7 @@ hr::before {
 @media (max-width: 420px) { .stats--quad { grid-template-columns: 1fr; } }
 .stat { text-align: center; }
 .stat__value { font-family: var(--font-display); font-size: clamp(2.8rem, 5vw, 3.8rem); line-height: 1; font-weight: 500; color: var(--navy-700); }
-.section--navy .stat__value { color: #fff; }
+.section--navy .stat__value { color: var(--white); }
 .stat__label { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); margin-top: var(--sp-2); }
 .section--navy .stat__label { color: var(--accent-dark); }
 
@@ -413,7 +605,7 @@ hr::before {
 }
 .callout p:last-child { margin-bottom: 0; }
 .callout--strong { background: var(--navy-plate); color: var(--navy-100); border-color: var(--accent-dark); }
-.callout--strong strong { color: #fff; }
+.callout--strong strong { color: var(--white); }
 blockquote.pull {
   margin: var(--sp-6) 0; padding: 0 var(--sp-5); border: 0; text-align: center;
   font-family: var(--font-display); font-style: italic; font-size: clamp(1.5rem, 2.6vw, 2rem);
@@ -423,7 +615,7 @@ blockquote.pull footer {
   font-family: var(--font-display); font-style: normal; font-size: .78rem; letter-spacing: .14em;
   text-transform: uppercase; color: var(--ink-mute); margin-top: var(--sp-4);
 }
-.section--navy blockquote.pull { color: #fff; }
+.section--navy blockquote.pull { color: var(--white); }
 .section--navy blockquote.pull footer { color: var(--accent-dark); }
 
 /* ---------- 17. Steps ---------------------------------------------------- */
@@ -440,8 +632,8 @@ blockquote.pull footer {
 
 /* ---------- 18. Media gallery -------------------------------------------- */
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--sp-5); }
-.gallery figure { margin: 0; overflow: hidden; border: 1px solid var(--line-2); background: var(--white); }
-.gallery img { aspect-ratio: 4/3; object-fit: cover; width: 100%; }
+.gallery figure { margin: 0; overflow: hidden; border: 1px solid var(--line-2); background: var(--surface); }
+.gallery img { aspect-ratio: 4/3; object-fit: cover; object-position: 50% 38%; width: 100%; }
 .gallery .ph {
   aspect-ratio: 4/3; display: grid; place-items: center; text-align: center; padding: var(--sp-4);
   background: var(--paper-2); color: var(--ink-mute); font-style: italic; font-size: .95rem; letter-spacing: .04em;
@@ -451,7 +643,7 @@ blockquote.pull footer {
 /* ---------- 18b. Frontispiece plate -------------------------------------- */
 /* A formal photograph set as a plate: thin frame, ruled mount, italic legend. */
 .plate { margin: 0; text-align: center; }
-.plate__frame { padding: var(--sp-3); border: 1px solid var(--line-2); background: var(--white); }
+.plate__frame { padding: var(--sp-3); border: 1px solid var(--line-2); background: var(--surface); }
 .plate__frame img { width: 100%; display: block; }
 .plate figcaption {
   margin-top: var(--sp-4); font-style: italic; color: var(--ink-mute);
@@ -472,7 +664,7 @@ tbody tr:hover { background: var(--paper-2); }
 .field label { font-size: .74rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
 .field input, .field select, .field textarea {
   font-family: inherit; font-size: 1.1rem; padding: .7rem .85rem;
-  border: 1px solid var(--line-2); border-radius: 0; background: var(--white); color: var(--ink);
+  border: 1px solid var(--line-2); border-radius: 0; background: var(--surface); color: var(--ink);
   transition: border-color .18s var(--ease);
 }
 .field input:focus, .field select:focus, .field textarea:focus {
@@ -486,22 +678,22 @@ tbody tr:hover { background: var(--paper-2); }
   background: var(--navy-plate); color: var(--navy-100); text-align: center;
   padding-block: clamp(3rem, 7vw, 5rem); border-block: 3px double var(--accent-dark);
 }
-.cta-band h2 { color: #fff; }
+.cta-band h2 { color: var(--white); }
 .cta-band p { color: var(--navy-100); font-style: italic; max-width: 52ch; margin-inline: auto; margin-bottom: var(--sp-6); font-size: 1.3rem; }
 .cta-band .btn-row { justify-content: center; }
 
 /* ---------- 22. Footer — the colophon ------------------------------------ */
 .site-footer { background: var(--navy-900); color: var(--navy-200); padding-block: var(--sp-8) var(--sp-5); font-size: 1.02rem; }
 .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: var(--sp-6); margin-bottom: var(--sp-7); }
-.site-footer h4 { color: #fff; font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; margin-bottom: var(--sp-4); font-weight: 600; }
+.site-footer h4 { color: var(--white); font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; margin-bottom: var(--sp-4); font-weight: 600; }
 .site-footer ul { list-style: none; padding: 0; margin: 0; }
 .site-footer li { margin-bottom: var(--sp-2); }
 .site-footer a { color: var(--navy-200); text-decoration: none; }
-.site-footer a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.site-footer a:hover { color: var(--white); text-decoration: underline; text-underline-offset: 3px; }
 .footer-brand { display: flex; gap: var(--sp-4); align-items: flex-start; }
 .footer-brand svg, .footer-brand img { width: 58px; flex: none; }
 .footer-brand p { font-size: 1rem; line-height: 1.6; margin: var(--sp-2) 0 0; color: var(--navy-200); font-style: italic; }
-.footer-letters { font-family: var(--font-display); font-size: 1.5rem; color: #fff; letter-spacing: .06em; }
+.footer-letters { font-family: var(--font-display); font-size: 1.5rem; color: var(--white); letter-spacing: .06em; }
 .footer-bottom {
   border-top: 1px solid rgba(201,185,142,.3); padding-top: var(--sp-5);
   display: flex; flex-wrap: wrap; gap: var(--sp-4); justify-content: space-between;
@@ -523,7 +715,7 @@ tbody tr:hover { background: var(--paper-2); }
   display: inline-block; font-size: .68rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
   color: var(--navy-600); border: 1px solid var(--line-2); padding: 3px 9px;
 }
-.tag--todo { border-color: #B9536A; color: #9A2540; }
+.tag--todo { border-color: var(--todo-line); color: var(--todo-ink); }
 
 /* Motion is intentionally absent — content is set as on a printed page. */
 .reveal, .reveal.is-in { opacity: 1; transform: none; }

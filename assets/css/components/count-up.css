@@ -1,0 +1,52 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   CountUp — styles for the vanilla port of the React Bits CountUp.
+   Scoped entirely to .count-up*; restyles nothing that already exists.
+   Colour, size and font all stay inherited from whatever the number sits in
+   (.hero__band dd, .stat__value, running text), so this file only has to
+   stop the ticking digits from moving the layout around.
+   ========================================================================== */
+
+/* The mount element itself. Everything visual is inherited on purpose. */
+.count-up {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* The ticker. Fixed-width figures stop the digits jittering, inline-block
+   plus the min-width the script measures before it starts stops the box
+   itself from growing as 0 climbs to 100,000. The script sets min-width in
+   pixels while counting and clears it on settle, so nothing here fights the
+   responsive clamp() font sizes on .stat__value. */
+.count-up__value {
+  display: inline-block;
+  white-space: nowrap;
+  font-variant-numeric: inherit;
+  font-feature-settings: inherit;
+  /* Keeps the reserved box aligned the way the surrounding block is:
+     centred inside .stat, flush left inside .hero__band. */
+  text-align: inherit;
+}
+
+/* The stable copy a screen reader actually reads: the finished value, once.
+   Visually hidden, never announced twice (the ticker is aria-hidden). */
+.count-up__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+}
+
+/* Nothing animates in CSS — the script owns the motion and already renders
+   the final value outright under prefers-reduced-motion. This is only here so
+   the global `animation-duration: .001ms !important` reduce rule in style.css
+   can never be read as applying to a half-counted number. */
+@media (prefers-reduced-motion: reduce) {
+  .count-up__value { min-width: 0 !important; }
+}

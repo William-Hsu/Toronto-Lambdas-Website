@@ -1,14 +1,39 @@
 <!DOCTYPE html>
-<html lang="en" data-root="">
+<html lang="en" data-root="" data-blur-text-targets=".hero__inner, .page-head__inner, .section > .wrap, .cta-band > .wrap">
 <head>
 <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <script>
+      /* Pre-paint the chosen impression before any CSS lands, so the page
+         never flashes the wrong theme. Mirrors assets/js/theme.js. */
+      (function () {
+        try {
+          var t = localStorage.getItem("lphie-theme");
+          /* Dark is the default impression; only a stored choice overrides it. */
+          if (t !== "light" && t !== "dark") { t = "dark"; }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <script src="assets/js/theme.js" defer></script>
     <meta name="theme-color" content="#12296B">
     <link rel="icon" href="assets/img/crest-navy.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/components/fold-text.css">
+    <link rel="stylesheet" href="assets/css/components/count-up.css">
+    <link rel="stylesheet" href="assets/css/components/masked-heading.css">
+    <link rel="stylesheet" href="assets/css/components/accordion-gallery.css">
+    <link rel="stylesheet" href="assets/css/components/logo-loop.css">
+    <link rel="stylesheet" href="assets/css/components/drift-wall.css">
+    <link rel="stylesheet" href="assets/css/components/border-glow.css">
+    <link rel="stylesheet" href="assets/css/components/gradual-blur.css">
+    <link rel="stylesheet" href="assets/css/components/section-fade.css">
+    <link rel="stylesheet" href="assets/css/components/masthead.css">
+    <link rel="stylesheet" href="assets/css/components/blur-text.css">
   <title>ΛΦΕ Alpha Xi · Lambda Phi Epsilon at the University of Toronto</title>
   <meta name="description" content="The Alpha Xi Chapter of Lambda Phi Epsilon International Fraternity at the University of Toronto · chartered in 2004 as the fraternity's first chapter outside the United States.">
   <meta property="og:title" content="ΛΦΕ Alpha Xi · Lambda Phi Epsilon at the University of Toronto">
@@ -25,7 +50,7 @@
   <header class="site-header" id="site-header"></header>
   <main id="main">
     <!-- ===== Hero ===== -->
-    <section class="hero">
+    <section class="hero hero--home">
       <div class="wrap">
         <div class="hero__inner">
           <div>
@@ -33,47 +58,42 @@
             <p class="hero__school">University of Toronto</p>
             <h1 class="hero__title">To Be <em>Leaders</em><br>Among Men</h1>
             <p class="hero__sub">
-              Lambda Phi Epsilon is the world&rsquo;s largest Asian-interest fraternity. In 2004 we became
+              <span data-fold-text='{}'>Lambda Phi Epsilon</span> is the world&rsquo;s largest Asian-interest fraternity. In 2004 we became
               its first chapter outside the United States, and we have built brothers on this campus
               ever since.
             </p>
             <p class="ornament" aria-hidden="true"></p>
             <div class="btn-row">
-              <a class="btn btn--primary" href="rush.html">Rush &Lambda;&Phi;&Epsilon;</a>
-              <a class="btn btn--ghost" href="about.html">Who we are</a>
+              <a class="btn btn--primary" href="rush.html" data-border-glow='{"variant":"navy"}'>Rush &Lambda;&Phi;&Epsilon;</a>
+              <a class="btn btn--ghost" href="about.html" data-border-glow='{"variant":"navy"}'>Who we are</a>
             </div>
           </div>
           <img class="hero__crest" src="assets/img/crest-navy.png" alt="Lambda Phi Epsilon crest" width="340" height="340">
         </div>
         <dl class="hero__band">
-          <div><dt>Founded</dt><dd>1981</dd></div>
-          <div><dt>Chartered at U of T</dt><dd>2004</dd></div>
-          <div><dt>Lifetime members</dt><dd data-fill="lifetimeMembers">100,000+</dd></div>
-          <div><dt>Active chapters</dt><dd data-fill="activeChapters">78</dd></div>
+          <div><dt>Founded</dt><dd data-count-up='{"from":1900,"duration":0.8}'>1981</dd></div>
+          <div><dt>Chartered at U of T</dt><dd data-count-up='{"from":1900,"duration":0.8}'>2004</dd></div>
+          <div><dt>Lifetime members</dt><dd data-fill="lifetimeMembers" data-count-up='{"duration":0.6}'>100,000+</dd></div>
+          <div><dt>Active chapters</dt><dd data-fill="activeChapters" data-count-up='{"duration":0.6}'>78</dd></div>
         </dl>
       </div>
     </section>
 
-    <!-- ===== Chapter plate ===== -->
-    <section class="section section--tight">
-      <div class="wrap">
-        <figure class="plate">
-          <div class="plate__frame">
-            <img src="assets/img/chapter-group.jpg" alt="The brothers of the Alpha Xi Chapter of Lambda Phi Epsilon at the University of Toronto"
-                 width="1003" height="726" loading="lazy">
-          </div>
-          <figcaption>The brothers of Alpha Xi &middot; Lambda Phi Epsilon at the University of Toronto</figcaption>
-        </figure>
+    <!-- ===== Drift wall (chapter photo band, directly below the hero) ===== -->
+    <section class="drift-wall-band">
+      <div class="drift-wall" data-drift-wall='{"turn":-4,"tilt":9,"depth":90}'>
+        <p class="drift-wall__fallback">Photographs from the Alpha Xi chapter &mdash; brotherhood retreats, rush,
+        the stem cell registry drive, convention and formal.</p>
       </div>
     </section>
 
-    <!-- ===== Who we are ===== -->
-    <section class="section">
+    <!-- ===== Who we are (counter-colour: navy plate in light mode, paper in dark) ===== -->
+    <section class="section section--navy">
       <div class="wrap">
         <div class="grid grid--2" style="align-items:start; gap:3rem">
           <div class="reveal">
             <p class="eyebrow">Who we are</p>
-            <h2>Rooted in heritage.<br>Open to all.</h2>
+            <h2 data-masked-heading='{"src":"assets/img/gallery/mahjong-night.jpg"}'>Rooted in heritage.<br>Open to all.</h2>
             <p class="lede dropcap">
               &Lambda;&Phi;&Epsilon; was founded in 1981 by nineteen men at UCLA who set out to raise the
               standard of excellence for young college men, and to build a home that Asian-American
@@ -103,10 +123,21 @@
     </section>
 
     <!-- ===== Pillars ===== -->
-    <section class="section section--paper">
+    <section class="section">
       <div class="wrap">
         <p class="eyebrow">The four pillars</p>
         <h2>What membership involves</h2>
+        <div class="mt-6 reveal">
+          <div data-accordion-gallery='{}'>
+            <!-- Shown only if the script never runs; the component replaces it. -->
+            <ul>
+              <li><a href="brotherhood.html">Brotherhood</a></li>
+              <li><a href="alumni.html">Academics</a></li>
+              <li><a href="philanthropy.html">Philanthropy</a></li>
+              <li><a href="brotherhood.html#social">Social</a></li>
+            </ul>
+          </div>
+        </div>
         <div class="grid grid--4 mt-6">
           <article class="card card--hover reveal">
             <div class="card__icon">&Beta;</div>
@@ -133,7 +164,7 @@
             <div class="card__icon">&Alpha;</div>
             <h3>Academics</h3>
             <p>Representation across every faculty, brothers who TA the courses you&rsquo;re taking, and a
-            chapter GPA average of <span data-fill="avgGpa">3.67</span>.</p>
+            chapter GPA average of <span data-fill="avgGpa" data-count-up='{"duration":0.6}'>3.67</span>.</p>
             <p><a href="alumni.html">Explore &rarr;</a></p>
           </article>
         </div>
@@ -151,8 +182,28 @@
       </div>
     </section>
 
+    <!-- ===== Alumni employers ===== -->
+    <section class="section section--tight">
+      <div class="wrap">
+        <p class="eyebrow">Where Alpha Xi goes</p>
+        <h2>Brothers graduate. The network does not.</h2>
+        <p class="lede measure">A sample of the firms our alumni have gone on to &mdash; and the reason
+        an Alpha Xi email tends to get answered.</p>
+      </div>
+      <div class="mt-6" data-logo-loop='{}'>
+        <!-- Shown only if the script never runs; the component replaces it. -->
+        <ul class="wrap">
+          <li>JPMorgan Chase &amp; Co.</li><li>Purpose Investments</li><li>Onex</li><li>TD</li>
+          <li>Scotiabank</li><li>BMO</li><li>Microsoft</li><li>Amazon</li><li>Citibank</li>
+          <li>Bank of America</li><li>Bank of China</li><li>PwC</li><li>EY</li><li>KPMG</li>
+          <li>Deloitte</li><li>Strategy&amp;</li><li>PushPress</li><li>Qualcomm</li><li>AMD</li>
+          <li>Rogers</li><li>Bell</li>
+        </ul>
+      </div>
+    </section>
+
     <!-- ===== Philanthropy teaser ===== -->
-    <section class="section">
+    <section class="section section--navy">
       <div class="wrap">
         <div class="grid grid--2" style="align-items:center; gap:3rem">
           <div class="reveal">
@@ -174,25 +225,26 @@
           </div>
           <div class="reveal">
             <div class="stats stats--quad">
-              <div class="stat"><div class="stat__value">1995</div><div class="stat__label">Evan Chen diagnosed</div></div>
+              <div class="stat"><div class="stat__value" data-count-up='{"from":1900,"duration":0.8}'>1995</div><div class="stat__label">Evan Chen diagnosed</div></div>
               <div class="stat"><div class="stat__value">1st</div><div class="stat__label">Asian-interest fraternity in the NIC (1990)</div></div>
               <div class="stat"><div class="stat__value">2 min</div><div class="stat__label">To join the registry</div></div>
-              <div class="stat"><div class="stat__value" data-fill="yearsActive">21</div><div class="stat__label">Years of Alpha Xi</div></div>
+              <div class="stat"><div class="stat__value" data-fill="yearsActive" data-count-up='{"duration":0.6}'>21</div><div class="stat__label">Years of Alpha Xi</div></div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
+
     <!-- ===== CTA ===== -->
-    <section class="cta-band">
+    <section class="cta-band cta-band--ground">
       <div class="wrap">
         <h2>Rush is free, non-binding,<br>and open to everyone.</h2>
         <p>Come to one event. Ask us anything. If it is not for you, there are no hard feelings. If it
         is, you will know quickly.</p>
         <div class="btn-row">
-          <a class="btn btn--light" href="rush.html">See the rush schedule</a>
-          <a class="btn btn--outline-light" href="contact.html">Talk to a brother</a>
+          <a class="btn btn--light" href="rush.html" data-border-glow>See the rush schedule</a>
+          <a class="btn btn--outline-light" href="contact.html" data-border-glow>Talk to a brother</a>
         </div>
       </div>
     </section>
@@ -203,6 +255,24 @@
   <script src="data/roster.js"></script>
   <script src="data/alumni.js"></script>
   <script src="data/content.js"></script>
+  <script src="data/pillars.js"></script>
+  <script src="data/logos.js"></script>
   <script src="assets/js/main.js"></script>
+
+  <!-- Interactive components. These load after main.js on purpose: count-up reads the
+       numbers that main.js injects into [data-fill] on DOMContentLoaded. -->
+  <script src="assets/js/components/fold-text.js"></script>
+  <script src="assets/js/components/count-up.js"></script>
+  <script src="assets/js/components/masked-heading.js"></script>
+  <script src="assets/js/components/accordion-gallery.js"></script>
+  <script src="assets/js/components/logo-loop.js"></script>
+  <script src="data/driftwall.js"></script>
+  <script src="assets/js/components/drift-wall.js"></script>
+  <script src="assets/js/components/border-glow.js"></script>
+  <script src="assets/js/components/gradual-blur.js"></script>
+
+  <!-- Soft blur where the page meets the viewport bottom. -->
+  <div data-gradual-blur='{"target":"page","position":"bottom","height":"4.5rem","strength":1.5,"divCount":5,"curve":"bezier","zIndex":40}'></div>
+  <script src="assets/js/components/blur-text.js"></script>
 </body>
 </html>

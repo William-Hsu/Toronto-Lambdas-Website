@@ -17,6 +17,15 @@
       .replace(/"/g, "&quot;");
   }
   function isTodo(s) { return /^\s*TODO/i.test(String(s || "")); }
+  /* The no-crop contract (style.css §2b): a photo frame needs the same file
+     as a CSS custom property so it can paint a blurred copy of it behind the
+     contained <img>. Two escapes, in order: encodeURI() removes every
+     character that could close url("...") early — quote, backslash, newline —
+     and the caller then runs esc() over the whole declaration for the HTML
+     attribute it lands in. */
+  function photoVar(url) {
+    return '--photo: url("' + encodeURI(String(url == null ? "" : url)) + '")';
+  }
   function initials(name) {
     return String(name || "").trim().split(/\s+/).slice(0, 2)
       .map(function (w) { return w.charAt(0); }).join("").toUpperCase() || "ΛΦΕ";
@@ -66,11 +75,20 @@
             "</span>" +
           "</span>" +
         "</a>" +
-        '<button class="nav__toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>' +
         '<ul class="nav__links" id="nav-links">' + links +
           '<li><a class="nav__cta" href="' + PREFIX + 'rush.html">Rush ΛΦΕ</a></li>' +
         "</ul>" +
+        '<div class="nav__end">' +
+          '<button class="nav__theme" type="button" data-theme-toggle aria-pressed="false" title="Switch theme">' +
+            '<span class="nav__theme-glyph" data-theme-glyph aria-hidden="true">☾</span>' +
+            '<span class="visually-hidden" data-theme-label>Dark mode</span>' +
+          "</button>" +
+          '<button class="nav__toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>' +
+        "</div>" +
       "</nav>";
+
+    /* theme.js paints the glyph / aria-pressed once the button exists. */
+    if (window.LPHIE && window.LPHIE.syncTheme) window.LPHIE.syncTheme();
 
     var toggle = el("nav-toggle"), list = el("nav-links");
     toggle.addEventListener("click", function () {
@@ -136,9 +154,15 @@
   /* ---- 3. Brother cards ------------------------------------------------- */
   function brotherCard(b, showRole) {
     var todo = isTodo(b.name);
-    var photo = b.photo
-      ? '<img src="' + PREFIX + "assets/img/brothers/" + esc(b.photo) + '" alt="' + esc(b.name) + '" loading="lazy">'
+    var photoSrc = b.photo ? PREFIX + "assets/img/brothers/" + b.photo : "";
+    var photo = photoSrc
+      ? '<img src="' + esc(photoSrc) + '" alt="' + esc(b.name) + '" loading="lazy">'
       : esc(initials(todo ? "" : b.name));
+    /* .photo-fit only when there IS a photo — a card falling back to initials
+       must keep the bare navy plate, with no fill layer over the letters. */
+    var photoFrame = photoSrc
+      ? '<div class="brother__photo photo-fit" style="' + esc(photoVar(photoSrc)) + '">'
+      : '<div class="brother__photo">';
 
     var meta = [];
     if (b.crossed) meta.push("Crossed " + esc(b.crossed));
@@ -148,7 +172,7 @@
     if (b.family) meta.push(esc(b.family));
 
     return '<article class="brother">' +
-      '<div class="brother__photo">' + photo + "</div>" +
+      photoFrame + photo + "</div>" +
       '<div class="brother__body">' +
         (showRole && b.role ? '<span class="brother__role">' + esc(b.role) + "</span>" : "") +
         '<h3 class="brother__name">' + (todo ? '<span class="tag tag--todo">Add name</span>' : esc(b.name)) + "</h3>" +
@@ -305,8 +329,14 @@
     var host = el("gallery-grid");
     if (host) {
       host.innerHTML = (window.LPHIE.gallery || []).map(function (g) {
-        var body = g.src
-          ? '<img src="' + PREFIX + "assets/img/gallery/" + esc(g.src) + '" alt="' + esc(g.caption) + '" loading="lazy">'
+        /* Whatever an editor drops in — a 3:4 phone photo, a square, a wide
+           panorama — the 4:3 plate is filled by a blurred copy of that same
+           file and the photograph itself is shown whole. */
+        var src = g.src ? PREFIX + "assets/img/gallery/" + g.src : "";
+        var body = src
+          ? '<div class="photo-fit" style="' + esc(photoVar(src)) + '">' +
+              '<img src="' + esc(src) + '" alt="' + esc(g.caption) + '" loading="lazy">' +
+            "</div>"
           : '<div class="ph">Drop a photo in<br>assets/img/gallery/</div>';
         return "<figure>" + body + "<figcaption>" +
                (isTodo(g.caption) ? '<span class="tag tag--todo">' + esc(g.caption) + "</span>" : esc(g.caption)) +

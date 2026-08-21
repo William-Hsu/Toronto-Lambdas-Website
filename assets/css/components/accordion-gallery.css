@@ -1,0 +1,243 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   AccordionGallery — vanilla port of the React Bits component of the same name.
+   Structural CSS is the reference's; only the palette is the chapter's
+   (royal blue and white, no third hue). Self-contained: every selector below
+   is scoped to .accordion-gallery / .ag-*.
+   ========================================================================== */
+
+.accordion-gallery {
+  --ag-accent: #FFFFFF;
+  --ag-overlay: #061539;          /* --navy-900 */
+  --ag-text: #FFFFFF;
+  --ag-gap: 10px;
+  --ag-radius: 8px;               /* --radius-lg */
+  --ag-media-size: 320px;
+
+  display: flex;
+  flex-direction: row;
+  gap: var(--ag-gap);
+  width: 100%;
+  max-width: 100%;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
+}
+
+.accordion-gallery--vertical { flex-direction: column; }
+
+/* ---- Panel --------------------------------------------------------------- */
+.ag-panel {
+  /* Both live on the panel, not the media: the overlay is a sibling of the
+     media and can only inherit these from a shared ancestor. (The React
+     original set them on the media, where the overlay never saw --ag-dim.) */
+  --ag-gray: 1;
+  --ag-dim: .35;
+
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--ag-radius);
+  cursor: pointer;
+  display: block;
+  text-decoration: none;
+  outline: none;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  background: #061539;
+  box-shadow: 0 10px 30px -18px rgba(6, 21, 60, .8);
+  will-change: flex-grow, transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ag-panel:focus-visible {
+  outline: 2px solid var(--ag-accent);
+  outline-offset: -6px;
+  box-shadow: 0 0 0 2px var(--ag-accent), 0 10px 30px -18px rgba(6, 21, 60, .8);
+}
+
+.ag-panel__frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* ---- Media (image or deterministic gradient placeholder) ----------------- */
+.ag-panel__media {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--ag-media-size);
+  height: 100%;
+  transform: translate(-50%, -50%);
+  filter: grayscale(var(--ag-gray));
+  will-change: transform, filter;
+}
+
+.accordion-gallery--vertical .ag-panel__media {
+  width: 100%;
+  height: var(--ag-media-size);
+}
+
+.ag-panel__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Placeholder: pure CSS, no network. Stops are set per index from JS, so no
+   two neighbouring pillars read the same. */
+.ag-panel__ph {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background:
+    radial-gradient(120% 80% at 22% 12%, rgba(255, 255, 255, .10) 0%, rgba(255, 255, 255, 0) 62%),
+    linear-gradient(var(--ag-ph-angle, 155deg), var(--ag-ph-a, #12296B) 0%, var(--ag-ph-b, #061539) 100%);
+}
+
+.ag-panel__letter {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "Cormorant Garamond", "EB Garamond", Georgia, serif;
+  font-weight: 600;
+  font-size: min(calc(var(--ag-media-size) * .52), 9rem);
+  line-height: 1;
+  color: var(--ag-text);
+  opacity: .17;
+  letter-spacing: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+
+/* ---- Overlay ------------------------------------------------------------- */
+.ag-panel__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Fallback for browsers without color-mix(). */
+  background: linear-gradient(180deg, transparent 45%, rgba(6, 21, 60, .78) 100%);
+}
+
+@supports (background: color-mix(in srgb, #000 50%, transparent)) {
+  .ag-panel__overlay {
+    background:
+      linear-gradient(180deg, transparent 45%, color-mix(in srgb, var(--ag-overlay) 78%, transparent) 100%),
+      color-mix(in srgb, var(--ag-overlay) calc(var(--ag-dim, .35) * 100%), transparent);
+  }
+}
+
+/* ---- Label --------------------------------------------------------------- */
+.ag-panel__label {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ag-panel__bar {
+  flex: 0 0 auto;
+  width: 3px;
+  height: 34px;
+  border-radius: 3px;
+  background: var(--ag-accent);
+  opacity: 0;
+  box-shadow: 0 0 12px rgba(255, 255, 255, .6);
+}
+
+.ag-panel__lines {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ag-panel__text {
+  color: var(--ag-text);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: clamp(1rem, 1.4vw, 1.4rem);
+  letter-spacing: .01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  text-shadow: 0 2px 14px rgba(6, 21, 60, .55);
+}
+
+/* The first click on a closed panel only opens it, so the open panel has to
+   say plainly that the next tap goes somewhere. */
+.ag-panel__cue {
+  color: var(--ag-text);
+  font-family: inherit;
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  text-shadow: 0 2px 10px rgba(6, 21, 60, .55);
+}
+
+/* ---- Small screens: the accordion becomes a vertical stack --------------- */
+@media (max-width: 520px) {
+  .accordion-gallery {
+    flex-direction: column;
+    perspective: none;
+    height: auto !important;
+  }
+  .accordion-gallery .ag-panel {
+    min-height: 84px;
+    transform: none !important;
+  }
+  .accordion-gallery .ag-panel__media {
+    width: 100%;
+    height: var(--ag-media-size);
+    /* No horizontal parallax to expose an edge once the media is full width. */
+    transform: translate(-50%, -50%) !important;
+  }
+  /* Every panel is tappable and named here — labels stay put. */
+  .accordion-gallery .ag-panel__bar,
+  .accordion-gallery .ag-panel__text {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* ...but only the open panel promises that a tap navigates. */
+  .accordion-gallery .ag-panel__cue {
+    opacity: 0 !important;
+    transform: none !important;
+  }
+  .accordion-gallery .ag-panel--active .ag-panel__cue { opacity: 1 !important; }
+  /* Stacked rows are short and wide: the letter moves out from behind the
+     label and sits on the right instead. */
+  .accordion-gallery .ag-panel__letter {
+    font-size: 3.5rem;
+    top: 50%;
+    left: auto;
+    right: 22px;
+    transform: translate(0, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ag-panel,
+  .ag-panel__media { will-change: auto; }
+}

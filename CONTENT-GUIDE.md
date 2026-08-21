@@ -27,6 +27,36 @@ Each entry looks like this:
 **Always work on a copy or a branch if you are nervous.** Git keeps every previous version:
 `git log` shows the history, `git checkout <commit> -- data/roster.js` restores an old one.
 
+## The homepage visual components
+
+The homepage has five animated pieces. They are plain JavaScript like everything else — there is
+still no build step — and each one reads its content from a data file you can edit:
+
+| What you see | Edit this file |
+|---|---|
+| The drifting wall of photos below "Who we are" | `data/driftwall.js` |
+| The four expanding pillar panels | `data/pillars.js` |
+| The scrolling row of company logos | `data/logos.js` |
+| The counting numbers in the stats bands | nothing — they animate whatever number is already there |
+| The photo-filled "Asian-interest" heading | drop a photo at `assets/img/masked-heading.jpg` |
+
+**None of them need images to work.** Until you supply photos they draw navy gradient
+placeholders on purpose, so the page never shows a broken image. To add real pictures:
+
+1. Put the file in `assets/img/gallery/` (photos) or `assets/img/logos/` (company logos).
+2. Open the matching data file above and put the **filename only** into the empty `image` or
+   `src` field — for example `image: "retreat-2026.jpg"`.
+3. Save and refresh.
+
+Two things worth knowing:
+
+- 19 of the 22 companies have real logo files. Purpose Investments, PushPress and Bank of
+  China do not, and render as wordmarks instead — which looks deliberate, not broken. Drop a
+  file into `assets/img/logos/` and add the filename to fix any of them.
+- The company logos are other people's trademarks. Use them only to describe where alumni
+  actually work, and drop any company that asks you to — blank that entry's `src` and it
+  falls back to a wordmark automatically.
+
 ## Termly checklist
 
 - [ ] Update `rushTermLabel` and the rush schedule in `data/content.js`
@@ -34,6 +64,7 @@ Each entry looks like this:
 - [ ] Add the class reveal video to `window.LPHIE.reveals`
 - [ ] Refresh the chapter GPA in `data/chapter.js`
 - [ ] Add 4–6 event photos to `assets/img/gallery/` and list them in `data/content.js`
+- [ ] Add this term's best photos to `data/driftwall.js` and `data/pillars.js`
 - [ ] Update the exec board after elections
 - [ ] Run `grep -rn "TODO" data/` and clear anything stale
 

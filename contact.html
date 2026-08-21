@@ -1,14 +1,31 @@
 <!DOCTYPE html>
-<html lang="en" data-root="">
+<html lang="en" data-root="" data-blur-text-targets=".hero__inner, .page-head__inner, .section > .wrap, .cta-band > .wrap">
 <head>
 <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <script>
+      /* Pre-paint the chosen impression before any CSS lands, so the page
+         never flashes the wrong theme. Mirrors assets/js/theme.js. */
+      (function () {
+        try {
+          var t = localStorage.getItem("lphie-theme");
+          /* Dark is the default impression; only a stored choice overrides it. */
+          if (t !== "light" && t !== "dark") { t = "dark"; }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <script src="assets/js/theme.js" defer></script>
     <meta name="theme-color" content="#12296B">
     <link rel="icon" href="assets/img/crest-navy.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/components/section-fade.css">
+    <link rel="stylesheet" href="assets/css/components/masthead.css">
+    <link rel="stylesheet" href="assets/css/components/blur-text.css">
   <title>Contact · ΛΦΕ Alpha Xi</title>
   <meta name="description" content="Contact the Alpha Xi Chapter of Lambda Phi Epsilon at the University of Toronto about rush, philanthropy, collaboration, alumni relations or a conduct concern.">
   <meta property="og:title" content="Contact · ΛΦΕ Alpha Xi">
@@ -33,7 +50,7 @@
       </div></div>
     </section>
 
-    <section class="section">
+    <section class="section section--navy">
       <div class="wrap">
         <div class="grid grid--2" style="gap:3rem; align-items:start">
           <div>
@@ -125,5 +142,6 @@
   <script src="data/alumni.js"></script>
   <script src="data/content.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/components/blur-text.js"></script>
 </body>
 </html>
