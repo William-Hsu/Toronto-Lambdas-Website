@@ -23,9 +23,12 @@
     } catch (e) { return null; }
   }
 
+  /* The chapter's plate is struck in the dark impression by default: a
+     visitor who has expressed no preference of their own is shown the dark
+     one, whatever their operating system happens to prefer. A visitor who
+     HAS chosen is never overridden — see stored(). */
   function preferred() {
-    return (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
-      ? "dark" : "light";
+    return "dark";
   }
 
   function current() {
@@ -88,13 +91,9 @@
     toggleTheme();
   });
 
-  /* Follow the OS only while the visitor has made no choice of their own. */
-  if (window.matchMedia) {
-    var mq = window.matchMedia("(prefers-color-scheme: dark)");
-    var onChange = function () { if (!stored()) apply(preferred(), false); };
-    if (mq.addEventListener) mq.addEventListener("change", onChange);
-    else if (mq.addListener) mq.addListener(onChange);
-  }
+  /* The OS is deliberately NOT followed: the default is the dark impression
+     for everyone who has not chosen, so an OS switch mid-visit must not move
+     the page underneath the reader. */
 
   window.LPHIE = window.LPHIE || {};
   window.LPHIE.toggleTheme = toggleTheme;

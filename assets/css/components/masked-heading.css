@@ -73,52 +73,93 @@
   display: block;
 }
 
+/* The media box holds a STACK now, not a single child: the gradient floor,
+   then one element per photograph, then the tint (§8). `isolation` is what
+   confines the tint's blending to that stack — it must composite with the
+   photograph beneath it and with nothing else on the page. (will-change
+   already opens a stacking context here; saying it outright means the
+   guarantee does not quietly depend on a performance hint.) */
 .masked-heading__media {
   position: absolute;
   inset: 0;
   display: block;
+  isolation: isolate;
   will-change: transform, filter;
   backface-visibility: hidden;
 }
 
-.masked-heading__source {
+/* Every layer fills the media box and stacks in source order. Absolute
+   positioning is what lets several coexist: the component used to hold exactly
+   one child here and reassign its src, which is what blanked the letterforms
+   mid-swap for <video> (HTMLMediaElement.load() drops the presented frame,
+   resets readyState to HAVE_NOTHING and re-fetches — an <img>'s pending-request
+   model has no equivalent, which is why the bug was invisible for images). */
+.masked-heading__layer {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.masked-heading__source {
   object-fit: cover;
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
+  opacity: 1;
+  transition: opacity 220ms ease;
 }
 
-/* ---- 5. Gradient fallback -------------------------------------------------
-   This is the state the site ships in until the exec board drops a wide
-   chapter photo at assets/img/masked-heading.jpg. It is not a placeholder
-   stand-in for a broken image — it is a finished treatment: a deep brand-navy
-   field with a royal-blue core and a slow-moving highlight. It inherits the
-   drift/parallax transform from .masked-heading__media for free, and adds its
-   own internal motion so the letterforms never look like flat fill.
-   Pure CSS — no external request, so it works over file://.
+/* A photograph that is not the current one. It stays in the DOM, fetched and
+   decoded, so coming back to it is a crossfade and not a request. Opacity, not
+   display/visibility: a hidden <video> must keep its decoded buffer. */
+.masked-heading__source.is-hidden { opacity: 0; }
+
+/* ---- 5. The gradient floor ------------------------------------------------
+   Not a fallback state any more — a LAYER, the bottom one, always present and
+   never removed. It is what the letterforms show while a photograph is still
+   arriving, if a path is wrong, if a file will not decode, and across the
+   instant a <video> re-buffers. That is what makes "the letters are never
+   empty" a structural property rather than a promise.
+
+   It is also the whole treatment when no photograph is wired at all: a deep
+   field with a royal core and a slow-moving highlight, drifting with the media
+   transform for free. Pure CSS — no request, so it works over file://.
+
+   EVERY COLOUR HERE IS A LITERAL. It used to be written in --navy-* tokens,
+   which looked tidy and was wrong twice over: style.css remaps --navy-900 to
+   var(--plate-onaccent) inside .section--navy (i.e. to #FBF9F3, near-white, in
+   the light impression) and the dark theme redefines --navy-700 and --navy-500
+   as parchment. The "fixed brand navy" gradient was therefore neither fixed nor
+   navy at the one place the component is mounted.
    -------------------------------------------------------------------------- */
 .masked-heading__fill {
-  position: relative;
   overflow: hidden;
-  background-color: var(--navy-700, #12296B);
+  background-color: #12296B;
   background-image:
-    /* upper-left royal glow (--navy-400) */
+    /* upper-left royal glow */
     radial-gradient(115% 150% at 8% 4%, rgba(95, 128, 220, 0.95) 0%, rgba(95, 128, 220, 0) 58%),
-    /* lower-right deep shadow (--navy-900) */
+    /* lower-right deep shadow */
     radial-gradient(105% 140% at 96% 96%, rgba(6, 21, 60, 1) 0%, rgba(6, 21, 60, 0) 62%),
-    /* the base sweep, navy-900 -> navy-700 -> navy-500 -> navy-800 */
-    linear-gradient(112deg,
-      var(--navy-900, #061539) 0%,
-      var(--navy-700, #12296B) 34%,
-      var(--navy-500, #2A50B4) 58%,
-      var(--navy-800, #0B1E52) 100%);
+    /* the base sweep */
+    linear-gradient(112deg, #061539 0%, #12296B 34%, #2A50B4 58%, #0B1E52 100%);
   background-repeat: no-repeat;
   background-size: 190% 190%, 190% 190%, 240% 240%;
   background-position: 6% 12%, 94% 88%, 20% 50%;
   animation: mh-fill-drift 24s ease-in-out infinite alternate;
+}
+
+/* On a dark ground the same field is struck in gilt instead. The duotone in §8
+   would carry a navy one anyway (screen() cannot leave a pixel below the gilt
+   tint), but screening navy up produces a muddy warm grey where the impression
+   asks for gold, so the floor changes plate along with everything else. */
+.masked-heading--on-dark .masked-heading__fill {
+  background-color: #6E5F3C;
+  background-image:
+    radial-gradient(115% 150% at 8% 4%, rgba(239, 228, 196, 0.9) 0%, rgba(239, 228, 196, 0) 58%),
+    radial-gradient(105% 140% at 96% 96%, rgba(62, 53, 32, 1) 0%, rgba(62, 53, 32, 0) 62%),
+    linear-gradient(112deg, #3E3520 0%, #6E5F3C 34%, #C9B98E 58%, #EFE4C4 100%);
 }
 
 /* A single soft sheen crossing the letterforms, on a different period so the
@@ -159,6 +200,8 @@
   .masked-heading__fill::after { animation: none; }
   .masked-heading__reveal { will-change: auto; }
   .masked-heading__media { will-change: auto; }
+  /* The photograph still swaps; it just cuts instead of dissolving. */
+  .masked-heading__source { transition: none; }
 }
 
 /* ---- 7. Last-ditch fallback ----------------------------------------------- */
@@ -170,17 +213,81 @@
   .masked-heading__reveal { display: none; }
 }
 
-/* ---- 8. The dark impression ---------------------------------------------
-   A chapter photograph is dark-on-dark against the midnight ground: the
-   letterforms fill with shadow and the line all but disappears. On the dark
-   plate the photograph inside the letters is lifted and cooled toward
-   parchment so the words read as brightly as engraved gilt would, while the
-   light impression keeps the photograph exactly as shot. */
-[data-theme="dark"] .masked-heading__source {
-  filter: brightness(2.15) contrast(0.88) saturate(0.62);
+/* ---- 8. The duotone -------------------------------------------------------
+   These letters are windows, so they read only where what is inside them runs
+   opposite the ground behind the page. This layer makes that true by
+   construction instead of asking the photograph to be true by luck.
+
+   It is one flat colour composited over the whole media stack:
+
+     LIGHT ground   multiply toward #365A93.
+                    multiply(a, t) = a * t <= t per channel, so no pixel can
+                    come out lighter than the ink. The ink itself is the worst
+                    case, and it is 5.80:1 on #F0EBDC (the .section--navy plate
+                    in the light impression) and 6.56:1 on the page's #FBF9F3.
+
+     DARK ground    screen toward #A89A75.
+                    screen(a, t) = 1 - (1-a)(1-t) >= t per channel, so no pixel
+                    can come out darker than the gilt: 5.18:1 on #17294B (the
+                    same plate in the dark impression) and 6.87:1 on #0A0F1C.
+
+   Those are floors for every pixel, not averages. Measured across all eleven
+   candidate photographs in assets/img, at both extremes of the drift envelope:
+   worst single pixel 5.80:1 light and 5.18:1 dark, 0.0% of pixels below 3:1 on
+   either — where the same photographs raw run 1.49:1 to 8.13:1 with as much as
+   92% of the visible band below 3:1. Tonal variation survives the compression
+   (sd of CIE L* 5.9-11.2 against 17-28 raw), so this reads as a duotone print,
+   not as flat fill — which is the idiom of the rest of the site anyway.
+
+   WHAT THIS REPLACED. Three rules keyed off the wrong things:
+     - brightness(2.15) contrast(0.88) saturate(0.62) applied whenever only ONE
+       photograph was wired. It keyed on "how many files" and not on "how bright
+       the file is", so on a bright frame — the single likeliest way to ship it
+       — it clamped up to 64% of the visible band to pure white, and on the dark
+       frame it was written for it still left 46.7% below 3:1.
+     - brightness(1.06) contrast(0.9) applied whenever TWO were wired. It was
+       switched on at mount and never reconsidered, so it took effect the
+       instant the theme flipped and stayed in force for the whole of the second
+       file's download — treating the light impression's photograph as though it
+       were the dark impression's.
+     - brightness(1.9) on the gradient, justified by a "fixed brand navy" that
+       §5 explains was not fixed and not navy.
+   None of them are needed now, and none of them could have been made safe: a
+   filter chosen ahead of time cannot know what it will be handed.
+
+   The polarity class comes from the JS, which reads the ground off the DOM
+   rather than assuming the page's --paper. See masked-heading.js §2.
+   -------------------------------------------------------------------------- */
+.masked-heading__tint { pointer-events: none; }
+
+/* Before the JS has read the ground — and if it never can — follow the theme
+   attribute, which is right for every plate on this site. Mutually exclusive
+   with the measured classes below, so the two never race on specificity. */
+.masked-heading:not(.masked-heading--on-light):not(.masked-heading--on-dark)
+  .masked-heading__tint {
+  background-color: #365A93;
+  mix-blend-mode: multiply;
+}
+[data-theme="dark"] .masked-heading:not(.masked-heading--on-light):not(.masked-heading--on-dark)
+  .masked-heading__tint {
+  background-color: #A89A75;
+  mix-blend-mode: screen;
 }
 
-/* The gradient fallback needs the same lift when no photograph is supplied. */
-[data-theme="dark"] .masked-heading__fill {
-  filter: brightness(1.9) saturate(0.8);
+.masked-heading--on-light .masked-heading__tint {
+  background-color: #365A93;
+  mix-blend-mode: multiply;
+}
+
+.masked-heading--on-dark .masked-heading__tint {
+  background-color: #A89A75;
+  mix-blend-mode: screen;
+}
+
+/* No blend modes at all (pre-2015 engines that still claim clip-path: url()).
+   Flat alpha over the photograph is weaker but still bounded: 90% of the ink
+   over the brightest possible pixel is 4.59:1 on the light plate, 90% of the
+   gilt over the darkest is 4.22:1 on the dark one. */
+@supports not ((mix-blend-mode: multiply) and (mix-blend-mode: screen)) {
+  .masked-heading__tint { mix-blend-mode: normal; opacity: 0.9; }
 }

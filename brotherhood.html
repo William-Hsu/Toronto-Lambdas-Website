@@ -3,16 +3,15 @@
 <head>
 <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark">
+    <meta name="color-scheme" content="dark light">
     <script>
       /* Pre-paint the chosen impression before any CSS lands, so the page
          never flashes the wrong theme. Mirrors assets/js/theme.js. */
       (function () {
         try {
           var t = localStorage.getItem("lphie-theme");
-          if (t !== "light" && t !== "dark") {
-            t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
-          }
+          /* Dark is the default impression; only a stored choice overrides it. */
+          if (t !== "light" && t !== "dark") { t = "dark"; }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
       })();
