@@ -284,12 +284,12 @@
      corporate marks still read. */
   background: linear-gradient(
     to bottom,
-    rgba(199, 210, 230, 0) 0%,
-    #C7D2E6 18%,
-    #C7D2E6 82%,
-    rgba(199, 210, 230, 0) 100%
+    rgba(143, 163, 198, 0) 0%,
+    #8FA3C6 18%,
+    #8FA3C6 82%,
+    rgba(143, 163, 198, 0) 100%
   );
-  --logoloop-fadeColorAuto: #C7D2E6;
+  --logoloop-fadeColorAuto: #8FA3C6;
   border-block: none;
   padding-block: 1.6rem;
 }
