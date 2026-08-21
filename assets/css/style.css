@@ -231,69 +231,6 @@ hr::before {
 
 :focus-visible { outline: 2px solid var(--navy-600); outline-offset: 3px; }
 
-/* ---------- 2b. Image fitting — contain, with a blurred self-fill ---------
-   THE NO-CROP CONTRACT. A photograph is never cut down to fill a frame.
-   The frame is still filled edge to edge, but by a scaled-up, blurred,
-   dimmed copy of THAT SAME photograph; the sharp photograph is then fitted
-   whole on top of it (object-fit: contain). Portrait, landscape and square
-   sources all keep every pixel, at every viewport width, and no hard
-   letterbox bar is ever shown.
-
-   Usage — put .photo-fit on the element that owns the aspect ratio and hand
-   it the same file the <img> uses:
-     <div class="photo-fit" style="--photo: url(&quot;…/reveal-night.jpg&quot;)">
-       <img src="…/reveal-night.jpg" alt="…">
-     </div>
-   The fill is dimmed by sinking it into the frame's own ground colour, so it
-   follows whichever impression is on: pale beige-white in light, blue-black
-   in dark. A component on a plate overrides --photo-ground (or simply keeps
-   its own background, which wins by cascade order).                        */
-.photo-fit {
-  position: relative;
-  isolation: isolate;             /* keeps the two layers' z-index local */
-  overflow: hidden;
-  background-color: var(--photo-ground, var(--surface));
-}
-
-/* Layer 1 — the fill. The same photograph, cover-fitted so it always covers,
-   blurred well past legibility and dropped back into the ground so it reads
-   as a soft mount, never as a second picture. Scaled up because a blur
-   feathers its own edges; the scale pushes that feathering out of frame. */
-.photo-fit::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: var(--photo, none);
-  background-size: cover;
-  background-position: 50% 50%;
-  background-repeat: no-repeat;
-  transform: scale(1.3);
-  filter: blur(24px) saturate(.7);
-  opacity: .5;
-  pointer-events: none;
-}
-
-/* Layer 2 — the photograph itself: whole, sharp, centred over its own fill.
-   Both layers are taken out of flow, so the frame must own its own size:
-   give .photo-fit an aspect-ratio (or a height) wherever it is used. */
-.photo-fit > img {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: 50% 50%;
-}
-
-/* On the dark impression the ground is blue-black, so the same fill reads as
-   a brighter second image unless it is sunk further and cooled down. */
-[data-theme="dark"] .photo-fit::before {
-  filter: blur(24px) saturate(.55) brightness(.8);
-  opacity: .34;
-}
-
 /* ---------- 3. Layout ---------------------------------------------------- */
 .wrap { width: 100%; max-width: var(--wrap); margin-inline: auto; padding-inline: var(--sp-5); }
 .wrap--narrow { max-width: var(--wrap-narrow); }
@@ -615,13 +552,10 @@ hr::before {
   display: grid; place-items: center; color: var(--accent-dark);
   font-family: var(--font-display); font-size: 2.6rem; letter-spacing: .04em; margin-top: var(--sp-4);
 }
-/* A card that HAS a photograph also carries .photo-fit (see §2b), so the
-   3:4 plate is filled by the blurred self-fill and the headshot is shown
-   whole — a landscape or square source is no longer cut to a portrait.
-   The navy plate below stays the ground in both impressions; the initials
-   fallback is untouched because .photo-fit is only added with a photo. */
-.brother__photo.photo-fit { --photo-ground: var(--navy-plate); }
-.brother__photo img { width: 100%; height: 100%; object-fit: contain; }
+/* Photographs fill their frame. The crop is taken from above centre, which is
+   where faces sit, so an upright source is trimmed at the feet rather than
+   through the head. */
+.brother__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 32%; }
 .brother__body { padding: var(--sp-4) 0 0; }
 .brother__name { font-family: var(--font-display); font-size: 1.35rem; color: var(--navy-700); margin: 0 0 2px; line-height: 1.2; }
 .brother__nick { font-size: .95rem; color: var(--ink-mute); font-style: italic; margin: 0 0 var(--sp-2); }
@@ -699,14 +633,7 @@ blockquote.pull footer {
 /* ---------- 18. Media gallery -------------------------------------------- */
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--sp-5); }
 .gallery figure { margin: 0; overflow: hidden; border: 1px solid var(--line-2); background: var(--surface); }
-/* The plate is 4:3, the photographs are not — so the frame is filled by the
-   blurred self-fill of §2b and the photograph itself is shown whole. A tall
-   3:4 photograph keeps all of itself here instead of losing 44% of its
-   height. Ground = the mount tone of the figure it sits in. */
-.gallery .photo-fit { --photo-ground: var(--surface); aspect-ratio: 4/3; width: 100%; }
-/* Hand-written markup that skips the .photo-fit wrapper still must not crop:
-   no fixed ratio, natural height, whole photograph. */
-.gallery figure > img { width: 100%; height: auto; }
+.gallery img { aspect-ratio: 4/3; object-fit: cover; object-position: 50% 38%; width: 100%; }
 .gallery .ph {
   aspect-ratio: 4/3; display: grid; place-items: center; text-align: center; padding: var(--sp-4);
   background: var(--paper-2); color: var(--ink-mute); font-style: italic; font-size: .95rem; letter-spacing: .04em;
