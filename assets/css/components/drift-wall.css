@@ -12,6 +12,14 @@
   width: 100%;
   height: clamp(360px, 46vw, 560px);
   overflow: hidden;
+  /* One-family rule: the band is a beige plate in light mode... */
+  background:
+    radial-gradient(120% 110% at 50% 0%, #F0EADB 0%, #E4DCC5 72%),
+    #E4DCC5;
+  border-block: 1px solid rgba(27, 48, 87, .14);
+}
+/* ...and a navy plate in dark mode. */
+[data-theme="dark"] .drift-wall-band {
   background:
     radial-gradient(120% 110% at 50% 0%, #0B1E52 0%, #061539 72%),
     #061539;
@@ -36,7 +44,7 @@
   --dw-lift: 64px;
   --dw-dim: 0.88;
   --dw-gray: 0;
-  --dw-overlay: #061539;   /* --navy-900 */
+  --dw-overlay: #F5F1E6;   /* light wash; dark override below */
   --dw-edge: 45%;          /* (1 - fade) * 100 */
 
   -webkit-mask-image:
@@ -48,6 +56,8 @@
     linear-gradient(to top, #000 var(--dw-edge), transparent 100%);
   mask-composite: intersect;
 }
+
+[data-theme="dark"] .drift-wall { --dw-overlay: #061539; }
 
 /* ---- 3. Plane, columns, tracks ----------------------------------------- */
 .drift-wall__plane {

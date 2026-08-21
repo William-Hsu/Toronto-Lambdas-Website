@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/components/drift-wall.css">
+    <link rel="stylesheet" href="assets/css/components/morph-slider.css">
   <title>Brotherhood · ΛΦΕ Alpha Xi</title>
   <meta name="description" content="Retreats, big brother pairings, family lines, cultural programming and interchapter visits at the Alpha Xi Chapter of Lambda Phi Epsilon.">
   <meta property="og:title" content="Brotherhood · ΛΦΕ Alpha Xi">
@@ -49,11 +49,16 @@
       </div></div>
     </section>
 
-    <!-- ===== Drift wall (chapter photo band) ===== -->
-    <section class="drift-wall-band">
-      <div class="drift-wall" data-drift-wall='{}'>
-        <p class="drift-wall__fallback">Photographs from the Alpha Xi chapter &mdash; brotherhood retreats, rush,
-        the stem cell registry drive, convention and formal.</p>
+    <!-- ===== Chapter slider ===== -->
+    <section class="section section--tight">
+      <div class="wrap">
+        <div data-morph-slider='{"transition":"melt","duration":1.1,"intensity":0.55,"autoplay":true,"autoplayDelay":5200,"overlayColor":"#0C1B38","label":"The chapter","items":[
+          {"image":"assets/img/chapter-group.jpg","caption":"The brothers of Alpha Xi · Lambda Phi Epsilon at the University of Toronto"},
+          {"image":"assets/img/gallery/alumni-banquet.jpg","caption":"Actives and alumni, annual banquet"},
+          {"image":"assets/img/gallery/reveal-night.jpg","caption":"Reveal night"},
+          {"image":"assets/img/gallery/interchapter-formal.jpg","caption":"Interchapter formal"},
+          {"image":"assets/img/gallery/pool-party.jpg","caption":"Summer pool party"}
+        ]}'></div>
       </div>
     </section>
 
@@ -147,8 +152,7 @@
   <script src="data/roster.js"></script>
   <script src="data/alumni.js"></script>
   <script src="data/content.js"></script>
-  <script src="data/driftwall.js"></script>
   <script src="assets/js/main.js"></script>
-  <script src="assets/js/components/drift-wall.js"></script>
+  <script src="assets/js/components/morph-slider.js"></script>
 </body>
 </html>

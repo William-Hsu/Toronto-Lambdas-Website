@@ -118,34 +118,69 @@
   --todo-ink:  #E7A3AE;
 }
 
-/* ---------- 1c. Counter-colour plates ------------------------------------
-   Founder rule: every page reads DUAL — both grounds always present.
-   Light mode: paper ground, navy plates. Dark mode: navy ground, so the
-   plates flip to paper with navy ink. Token re-override only; every plate
-   rule downstream picks these up automatically. */
-[data-theme="dark"] .section--navy,
-[data-theme="dark"] .cta-band,
-[data-theme="dark"] .callout--strong {
-  --navy-plate:  #F5F1E6;   /* the plate turns to paper                */
-  --navy-100:    #4C463A;   /* plate body ink — warm dark              */
-  --navy-200:    #7C7360;
-  --white:       #1B3057;   /* plate headings — primary navy           */
-  --accent-dark: #24406F;   /* gilt accents become engraved navy       */
-  --accent:      #24406F;
-  --navy-900:    #F5F1E6;   /* ink target when accent fills on hover   */
+/* ---------- 1c. Tone-variant plates --------------------------------------
+   Founder rule: each theme stays in ONE family. Light mode: every surface
+   is beige/white, letters black/blue. Dark mode: every surface is
+   blue/black, letters white/beige. The old navy plates keep their section
+   rhythm but render as tone variations of the theme's own family. */
+:root {
+  --plate-bg:        #FBF9F3;                 /* light plate: warm near-white   */
+  --plate-ink:       #4C463A;                 /* plate body ink                 */
+  --plate-head:      #1B3057;                 /* plate headings                 */
+  --plate-accent:    #24406F;                 /* plate accents, engraved navy   */
+  --plate-onaccent:  #FBF9F3;                 /* ink atop accent fills          */
+  --plate-line:      rgba(27, 48, 87, .4);    /* hairlines on the plate         */
+  --plate-hover:     rgba(27, 48, 87, .08);
+  --footer-bg:       #EDE7D6;
+  --footer-ink:      #4C463A;
+  --footer-head:     #1B3057;
+  --footer-mute:     #7C7360;
 }
-[data-theme="dark"] .section--navy .eyebrow { border-top-color: rgba(36, 64, 111, .5); }
-[data-theme="dark"] .section--navy .card   { border-top-color: rgba(36, 64, 111, .45); }
-[data-theme="dark"] .cta-band .btn--outline-light        { border-color: rgba(27, 48, 87, .5); }
-[data-theme="dark"] .cta-band .btn--outline-light:hover  { border-color: #1B3057; background: rgba(27, 48, 87, .08); }
-[data-theme="dark"] .section--navy .callout {
-  background: rgba(27, 48, 87, .08); border-color: rgba(27, 48, 87, .3);
+[data-theme="dark"] {
+  --plate-bg:        #17294B;                 /* dark plate: lifted navy        */
+  --plate-ink:       #D9CFB6;
+  --plate-head:      #F7F2E3;
+  --plate-accent:    #D2C199;                 /* warm gilt                      */
+  --plate-onaccent:  #0C1B38;
+  --plate-line:      rgba(201, 185, 142, .45);
+  --plate-hover:     rgba(255, 255, 255, .1);
+  --footer-bg:       #08142B;
+  --footer-ink:      #CFC4A6;
+  --footer-head:     #F7F2E3;
+  --footer-mute:     #9C917A;
 }
 
-/* Plate legibility for elements that can now sit on a plate in either theme. */
-.section--navy .dropcap::first-letter { color: var(--accent-dark); }
-.section--navy a:not(.btn) { color: var(--navy-100); text-decoration-color: var(--accent-dark); }
-.section--navy a:not(.btn):hover { color: var(--white); }
+/* Map the legacy plate custom-props onto the theme's plate palette. */
+.section--navy,
+.cta-band,
+.callout--strong {
+  --navy-plate:  var(--plate-bg);
+  --navy-100:    var(--plate-ink);
+  --navy-200:    var(--plate-ink);
+  --white:       var(--plate-head);
+  --accent-dark: var(--plate-accent);
+  --accent:      var(--plate-accent);
+  --navy-900:    var(--plate-onaccent);
+}
+.section--navy .eyebrow                 { border-top-color: var(--plate-line); }
+.section--navy .card                    { border-top-color: var(--plate-line); }
+.section--navy .btn--outline-light,
+.cta-band .btn--outline-light           { border-color: var(--plate-line); }
+.section--navy .btn--outline-light:hover,
+.cta-band .btn--outline-light:hover     { border-color: var(--plate-head); background: var(--plate-hover); }
+.section--navy .callout                 { background: var(--plate-hover); border-color: var(--plate-line); }
+.section--navy .dropcap::first-letter   { color: var(--plate-accent); }
+.section--navy a:not(.btn)              { color: var(--plate-ink); text-decoration-color: var(--plate-accent); }
+.section--navy a:not(.btn):hover        { color: var(--plate-head); }
+
+/* Footer follows the same one-family rule. */
+.site-footer {
+  --navy-900: var(--footer-bg);
+  --navy-200: var(--footer-ink);
+  --white:    var(--footer-head);
+  --navy-400: var(--footer-mute);
+}
+.site-footer .footer-bottom { border-top-color: var(--plate-line); }
 
 /* ---------- 2. Reset ----------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
