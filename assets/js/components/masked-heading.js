@@ -10,47 +10,6 @@
    Mount:  <h2 data-masked-heading='{}'>Asian-interest.<br>Never Asian-exclusive.</h2>
    The heading text is read OUT OF THE DOM (a <br> counts as a line break), so
    the markup still renders as an ordinary heading if this script never runs.
-
-   ---- LEGIBILITY IS THE COMPONENT'S JOB, NOT THE PHOTOGRAPH'S -------------
-   These letters are WINDOWS: what makes them legible is the contrast between
-   what is inside them and the ground behind the page. That used to be handled
-   by ASKING for it — supply a dark photograph for the light impression, a
-   bright one for the dark impression, and let a CSS brightness crank cover the
-   case where only one was supplied. Every part of that was a hope, and each
-   part could fail on its own: a crank aimed at a dark frame clips a bright one
-   to white paste; a frame picked for its whole-frame average can be nothing
-   like the narrow band this heading actually shows; and the wiring can simply
-   be done the other way round by whoever edits the markup next.
-
-   It is now a property of the component. A tint layer composites the whole
-   media box toward one ink, with mix-blend-mode:
-
-     light ground — multiply toward #365A93. multiply(a, t) <= t per channel,
-                    so no pixel can come out lighter than that ink: worst case
-                    5.80:1 against the plate this heading sits on.
-     dark ground  — screen toward #A89A75. screen(a, t) >= t per channel, so no
-                    pixel can come out darker than that gilt: worst case 5.18:1.
-
-   Both are floors for EVERY pixel, not averages — measured over all eleven
-   candidate photographs in assets/img at both extremes of the drift envelope:
-   0.0% of pixels below 3:1 on either ground, against 4.5%-92% for the raw
-   frames. Tonal variation survives (sd of CIE L* 5.9-11.2, from 17-28 raw), so
-   the letterforms still read as a photograph and not as flat fill.
-
-   The ground those numbers are measured against is READ OFF THE DOM at mount
-   and on every theme change, not assumed: index.html mounts this heading
-   inside <section class="section--navy">, whose ground is --plate-bg
-   (#F0EBDC light / #17294B dark), not the page's #FBF9F3 / #0A0F1C.
-
-   ---- src / srcDark -------------------------------------------------------
-   Two photographs, one per impression, are now a REFINEMENT rather than a
-   legibility mechanism. srcDark is optional; leave it out and there is one
-   photograph, one request, and nothing to swap. Supply it and the two are
-   crossfaded live whenever theme.js flips <html data-theme> — separate
-   elements, each decoded before it is shown, so the drift never restarts and
-   the letterforms never flash empty. Both are still shown at their best when
-   `src` is the darker frame and `srcDark` the brighter one, because the
-   duotone then compresses less; neither choice can make the heading illegible.
    ========================================================================== */
 (function () {
   "use strict";
@@ -77,37 +36,15 @@
 
     /* Media. The exec board drops a WIDE chapter photo (roughly 3:1, at least
        1600px across, JPEG) at assets/img/masked-heading.jpg and it appears
-       here with no other change. Until that file exists — or if the path is
-       wrong, or the file will not decode — the gradient floor shows instead,
-       and it is a finished treatment, not a placeholder.
-
-       NB when choosing a frame: this heading is about 5.5:1 and object-fit is
-       cover, so a portrait file shows a horizontal SLIVER of itself — roughly
-       5% of a 462x1000 frame, dead centre. Letterbox bars, sky and floor never
-       appear, and a whole-frame average says nothing about what lands inside
-       the letters. Legibility does not depend on the choice (see the header),
-       but framing does.
-
-       src     — the photograph shown on a light ground. A darker frame
-                 compresses least there. The only photograph if srcDark is
-                 absent, and then it serves both impressions.
-       srcDark — OPTIONAL second photograph, shown on a dark ground. A brighter
-                 frame compresses least there. Absent (the default "") means
-                 "one photograph, both grounds" — the second file is never
-                 fetched and nothing is ever swapped. */
+       here with no other change. Until that file exists the onerror path
+       below renders the animated navy gradient instead. */
     mediaType: "image",             /* "image" | "video" */
     src: "assets/img/masked-heading.jpg",
-    srcDark: "",
     poster: "",
 
     fillScale: 1.25,                /* TUNED — reference 1.25, kept */
     parallax: 26,
     drift: 18,
-
-    /* These three ride on the media box, i.e. they are applied to the result
-       of the duotone rather than to the raw photograph. At their defaults they
-       are a no-op; moving them is the one way to spend the contrast floor the
-       component otherwise guarantees, so treat 1 / 1 as the sane values. */
     brightness: 1,
     saturation: 1,
     grayscale: false,
@@ -332,384 +269,60 @@
     root.appendChild(svg);
     root.appendChild(layer);
 
-    /* -- 2. Media: three layers, and a fill that cannot go illegible --------
+    /* -- 2. Media, with the gradient fallback ----------------------------- */
+    var source = null;
+    var onSourceError = null;
+    var usingGradient = false;
 
-       Inside .masked-heading__media, bottom to top:
-
-         1. the GRADIENT FLOOR — always present, never removed. While a
-            photograph is still arriving, or has failed, or a <video> is
-            re-buffering, this is what the letterforms show. The clip window
-            therefore never shows the page ground through the letters at any
-            point in the component's life, which is the one property the old
-            "swap the src on a single element" design could not offer.
-         2. one ELEMENT PER PHOTOGRAPH — created once, `src` assigned exactly
-            once, shown and hidden by opacity. Nothing ever reassigns a src,
-            so nothing is ever reset to a blank frame. (An <img>'s
-            current/pending-request model hides that cost; HTMLMediaElement
-            does not — .load() drops the presented frame, resets readyState to
-            HAVE_NOTHING and re-fetches from the network. A themed <video>
-            swap used to blank the letters for the whole of that fetch.)
-         3. the TINT — one flat colour composited over everything beneath it
-            with mix-blend-mode. See "THE DUOTONE" below.
-
-       ---- THE DUOTONE ----------------------------------------------------
-       These letters are windows, and a window is legible only if what is
-       inside it runs opposite the ground behind the page. The component used
-       to obtain that by ASKING: pick a dark photograph for `src`, a bright one
-       for `srcDark`, and crank brightness in CSS when only one was supplied.
-       Every part of that was a hope. A brightness crank aimed at a dark frame
-       clips a bright one to white paste; a "dark" photograph chosen from its
-       whole-frame mean can be bright in the narrow band this heading actually
-       shows (object-fit: cover into a ~5.5:1 box, then fillScale, leaves ~5%
-       of a portrait frame on screen — letterbox padding and all the sky can
-       sit entirely outside it); and any of it can be wired the wrong way round
-       by whoever edits the markup next.
-
-       So legibility is no longer a property of the photograph. The tint layer
-       composites the whole media box toward one ink:
-
-         light ground — multiply toward #365A93 (royal-blue ink).
-                        multiply(a, t) <= t per channel, so NO pixel can come
-                        out lighter than the ink. The ink itself is the worst
-                        case: 5.80:1 on the plate this heading is mounted on.
-         dark ground  — screen toward #A89A75 (gilt).
-                        screen(a, t) >= t per channel, so NO pixel can come out
-                        darker than the gilt. Worst case 5.18:1 on the plate.
-
-       Both are floors, not averages, and they hold for every pixel of every
-       frame — measured over the eleven candidate photographs in assets/img,
-       at both extremes of the drift envelope: worst single pixel 5.80:1
-       (light) and 5.18:1 (dark), 0.0% of pixels below 3:1 on either. The raw
-       frames score 1.49:1 to 8.13:1 with up to 92% of pixels below 3:1, which
-       is the measurement the old "just pick the right photo" rule was making
-       by eye. Tonal variation survives the compression (sd of CIE L* runs
-       5.9-11.2 against 17-28 raw), so the letterforms still read as a
-       photograph rather than as flat fill — a duotone print, which is what
-       this site's whole idiom is anyway.
-
-       `src` and `srcDark` are therefore no longer a legibility mechanism, only
-       a refinement: two frames, one per impression, if the exec board has two
-       worth using. One is fine. Neither is fine — the gradient floor takes
-       over and is tinted by the same rule.
-
-       ---- THE GROUND -----------------------------------------------------
-       All of that is decided against the colour this heading is ACTUALLY
-       painted on, read off the DOM at mount and on every theme change. It is
-       not the page ground: index.html mounts this inside
-       <section class="section--navy">, whose background is --plate-bg —
-       #F0EBDC in the light impression and #17294B in the dark one, against the
-       page's own #FBF9F3 / #0A0F1C. #17294B is five times brighter than
-       #0A0F1C, so a component calibrated against the page ground would be
-       calibrated against a colour it never touches.
-       ---------------------------------------------------------------------- */
-    var alive = true;
-
-    /* Every pending timer, so destroy() leaves nothing running. */
-    var timers = [];
-    function later(fn, ms) {
-      var id = window.setTimeout(function () {
-        var at = timers.indexOf(id);
-        if (at >= 0) timers.splice(at, 1);
-        if (alive) fn();
-      }, ms);
-      timers.push(id);
-      return id;
-    }
-
-    /* ---- Colour ---------------------------------------------------------- */
-    function parseColor(v) {
-      var m = /^rgba?\(([^)]+)\)$/i.exec(String(v === null || v === undefined ? "" : v).replace(/^\s+|\s+$/g, ""));
-      if (!m) return null;
-      var raw = m[1].replace(/\//g, " ").split(/[\s,]+/);
-      var p = [];
-      for (var i = 0; i < raw.length; i += 1) { if (raw[i]) p.push(parseFloat(raw[i])); }
-      if (p.length < 3) return null;
-      for (i = 0; i < 3; i += 1) { if (!isFinite(p[i])) return null; }
-      var a = (p.length > 3 && isFinite(p[3])) ? p[3] : 1;
-      return { r: p[0], g: p[1], b: p[2], a: a };
-    }
-
-    function channelL(c) {
-      c = c / 255;
-      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    }
-
-    function luminance(c) {
-      return 0.2126 * channelL(c.r) + 0.7152 * channelL(c.g) + 0.0722 * channelL(c.b);
-    }
-
-    function contrastOf(a, b) {
-      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-    }
-
-    /* Relative luminance of the two tints in masked-heading.css §8. Keep the
-       two files in step: these numbers are the whole guarantee. */
-    var INK_TINT_L = 0.1020;    /* #365A93 — the light-ground duotone's ceiling */
-    var GILT_TINT_L = 0.3272;   /* #A89A75 — the dark-ground duotone's floor    */
-
-    /* The first ancestor that actually paints something is the ground. */
-    function groundLuminance() {
-      var el = root, guard = 48, c;
-      while (el && el.nodeType === 1 && guard > 0) {
-        guard -= 1;
-        c = parseColor(window.getComputedStyle(el).backgroundColor);
-        if (c && c.a >= 0.5) return luminance(c);
-        el = el.parentNode;
+    function useGradient() {
+      if (usingGradient) return;
+      usingGradient = true;
+      if (source) {
+        if (onSourceError) source.removeEventListener("error", onSourceError);
+        if (source.parentNode) source.parentNode.removeChild(source);
+        source = null;
       }
-      return -1;    /* everything transparent — fall back to the theme flag */
+      root.classList.add("masked-heading--gradient");
+      var fill = document.createElement("span");
+      fill.className = "masked-heading__source masked-heading__fill";
+      media.appendChild(fill);
     }
 
-    function darkThemeActive() {
-      return document.documentElement.getAttribute("data-theme") === "dark";
-    }
+    (function buildSource() {
+      var src = resolveSrc(typeof o.src === "string" ? o.src : "");
+      if (!src) { useGradient(); return; }        /* empty src — no failed request */
 
-    /* Which duotone reads better on that ground. Each polarity's worst case is
-       its own tint (multiply can never exceed it, screen can never fall below
-       it), so choosing the polarity is choosing the higher guaranteed floor —
-       which also does the right thing on a ground neither impression predicted. */
-    var polarity = "";
+      onSourceError = function () { useGradient(); };
 
-    function syncPolarity() {
-      var g = groundLuminance();
-      var next;
-      if (g < 0) next = darkThemeActive() ? "dark" : "light";
-      else next = (contrastOf(INK_TINT_L, g) >= contrastOf(GILT_TINT_L, g)) ? "light" : "dark";
-      if (next === polarity) return;
-      polarity = next;
-      if (next === "light") {
-        root.classList.add("masked-heading--on-light");
-        root.classList.remove("masked-heading--on-dark");
-      } else {
-        root.classList.add("masked-heading--on-dark");
-        root.classList.remove("masked-heading--on-light");
-      }
-    }
-
-    /* ---- Sources --------------------------------------------------------- */
-    var lightUrl = resolveSrc(typeof o.src === "string" ? o.src : "");
-    var darkUrl = resolveSrc(typeof o.srcDark === "string" ? o.srcDark : "");
-
-    /* TWO DISTINCT files is what arms the second fetch. The same string twice
-       is one photograph, so it stays on the cheap path: one element, one
-       request, nothing to swap. */
-    var dualSource = !!(darkUrl && darkUrl !== lightUrl);
-
-    /* Chosen by the measured GROUND, not by the theme attribute: the pairing
-       is "dark frame for a light ground, bright frame for a dark one", and the
-       ground is the thing that statement is about. */
-    function urlForTheme() {
-      return (dualSource && polarity === "dark") ? darkUrl : lightUrl;
-    }
-
-    /* How long a theme flip waits for a photograph before it stops holding the
-       decision open. Nothing goes illegible when it expires — the outgoing
-       photograph is still up and the duotone has already followed the new
-       ground — so this only bounds the WAIT, never the request: the same
-       waiter still fires and upgrades if the file lands afterwards. */
-    var SWAP_DEADLINE = 1200;
-
-    /* Layer 1 — the floor. First child, and it is never removed. */
-    var fillEl = document.createElement("span");
-    fillEl.className = "masked-heading__layer masked-heading__fill";
-    media.appendChild(fillEl);
-
-    /* Layer 3 — the duotone, appended last so every photograph AND the floor
-       composite through it. */
-    var tintEl = document.createElement("span");
-    tintEl.className = "masked-heading__layer masked-heading__tint";
-    media.appendChild(tintEl);
-
-    var loads = {};             /* url -> record; also the "already asked for" set */
-    var shownUrl = "";          /* the photograph currently at full opacity */
-    var wantedUrl = "";         /* what the most recent ground decision asked for */
-    var preloadQueued = false;
-    var idleHandle = 0;
-
-    function settleLoad(rec, ok) {
-      if (rec.state !== "pending") return;
-      rec.state = ok ? "ok" : "fail";
-      if (!ok && rec.el && rec.el.parentNode) rec.el.parentNode.removeChild(rec.el);
-      var list = rec.waiting;
-      rec.waiting = [];
-      for (var i = 0; i < list.length; i += 1) list[i](ok);
-    }
-
-    function hasFailed(url) { return !!(loads[url] && loads[url].state === "fail"); }
-
-    /* Build the element that will BE on screen, hidden, and let it be its own
-       preloader: one element per url, one request per url, src assigned once.
-       (The old code decoded a throwaway probe and then set the same url on a
-       different element, which for <video> shares no buffer at all and made
-       the live element start over from the network.) */
-    function createResource(url) {
-      var rec = { url: url, state: "pending", el: null, waiting: [], onReady: null, onError: null };
-      loads[url] = rec;
-
-      rec.onError = function () { settleLoad(rec, false); };
-
-      var el;
       if (o.mediaType === "video") {
-        el = document.createElement("video");
-        el.className = "masked-heading__layer masked-heading__source is-hidden";
-        el.setAttribute("muted", "");
-        el.setAttribute("loop", "");
-        el.setAttribute("playsinline", "");
-        el.setAttribute("webkit-playsinline", "");
-        el.setAttribute("preload", "auto");
-        el.muted = true;
-        el.loop = true;
-        el.playsInline = true;
-        if (o.poster) el.setAttribute("poster", resolveSrc(o.poster));
-        /* loadeddata, not canplaythrough: one decoded frame is all a swap
-           needs, and canplaythrough can go unfired on a throttled connection. */
-        rec.onReady = function () { settleLoad(rec, true); };
-        el.addEventListener("loadeddata", rec.onReady);
-        el.addEventListener("error", rec.onError);
-        rec.el = el;
-        media.insertBefore(el, tintEl);
-        el.setAttribute("src", url);          /* set last, after the listeners */
-        return rec;
+        var video = document.createElement("video");
+        video.className = "masked-heading__source";
+        video.setAttribute("muted", "");
+        video.setAttribute("loop", "");
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+        video.setAttribute("autoplay", "");
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        if (o.poster) video.setAttribute("poster", resolveSrc(o.poster));
+        video.addEventListener("error", onSourceError);
+        video.setAttribute("src", src);
+        media.appendChild(video);
+        source = video;
+        return;
       }
 
-      el = document.createElement("img");
-      el.className = "masked-heading__layer masked-heading__source is-hidden";
-      el.setAttribute("alt", "");
-      el.setAttribute("draggable", "false");
-      el.setAttribute("decoding", "async");
-      rec.onReady = function () {
-        /* The bytes arrived; they still have to RASTER. A frame that is too
-           large for the device fires `load` and then fails to decode, firing
-           NO error — the one case that used to be banked as a success and
-           committed to the live element, where it painted an empty window with
-           no recovery path. decode() is the only thing that separates the two.
-           Nothing ever reassigns this element's src, so the "superseded
-           request" rejection that once excused ignoring it cannot arise here:
-           a rejection means the file is undecodable, and it is treated as the
-           failure it is. */
-        if (typeof el.decode !== "function") { settleLoad(rec, true); return; }
-        el.decode().then(function () { settleLoad(rec, true); },
-                         function () { settleLoad(rec, false); });
-      };
-      el.addEventListener("load", rec.onReady);
-      el.addEventListener("error", rec.onError);
-      rec.el = el;
-      media.insertBefore(el, tintEl);
-      el.setAttribute("src", url);            /* set last, after the listeners */
-      return rec;
-    }
-
-    /* A url whose state is already known answers SYNCHRONOUSLY, which is what
-       makes the second flip of the theme instant. `done` may be called twice
-       when a deadline is given: once with false on expiry, once for real. */
-    function loadResource(url, done, deadline) {
-      var rec = loads[url] || createResource(url);
-      if (rec.state !== "pending") { if (done) done(rec.state === "ok"); return; }
-      if (!done) return;
-      rec.waiting.push(done);
-      if (deadline > 0) {
-        later(function () { if (rec.state === "pending") done(false); }, deadline);
-      }
-    }
-
-    /* Show one photograph, hide every other. The floor is under all of them,
-       so showPhoto("") IS the whole fallback path — there is no state in which
-       the clip window shows the page ground through the letters. */
-    function showPhoto(url) {
-      var k, rec, el, played;
-      for (k in loads) {
-        if (!hasOwn(loads, k)) continue;
-        rec = loads[k];
-        el = rec.el;
-        if (!el) continue;
-        if (k === url) {
-          el.classList.remove("is-hidden");
-          if (o.mediaType === "video") {
-            played = el.play ? el.play() : null;
-            if (played && typeof played["catch"] === "function") played["catch"](function () {});
-          }
-        } else {
-          el.classList.add("is-hidden");
-          /* A hidden <video> keeps its decoded buffer — that is the point of
-             keeping it — but it must not go on costing frames. */
-          if (o.mediaType === "video" && el.pause) { try { el.pause(); } catch (e) {} }
-        }
-      }
-      shownUrl = url || "";
-    }
-
-    /* The wanted photograph is unavailable (broken, or still in flight past the
-       deadline). Whatever is on screen is legible under EITHER duotone — that
-       is what the tint bought — so the outgoing frame is left up rather than
-       dropped, and only a window with no photograph at all falls back to the
-       floor. A failed srcDark therefore costs the dark impression its second
-       frame, not its legibility. */
-    function keepWhatIsUp() {
-      if (shownUrl && loads[shownUrl] && loads[shownUrl].state === "ok") return;
-      showPhoto("");
-    }
-
-    /* Called at mount and on every ground change. Decode first, commit second. */
-    function applySource() {
-      var url = urlForTheme();
-      wantedUrl = url;
-      if (!url) { showPhoto(""); return; }        /* empty src — no failed request */
-      if (shownUrl === url) return;               /* already on screen */
-      if (hasFailed(url)) { keepWhatIsUp(); return; }
-
-      loadResource(url, function (ok) {
-        /* A visitor can flip the toggle twice before a file lands; only the
-           newest decision is allowed to paint. */
-        if (!alive || wantedUrl !== url) return;
-        if (ok) { showPhoto(url); preloadOther(); return; }
-        keepWhatIsUp();
-      }, SWAP_DEADLINE);
-    }
-
-    /* The second photograph is worth having in cache before the visitor reaches
-       the toggle — but not at the expense of the one on screen, so it waits for
-       the visible source to settle and then goes on idle time. With srcDark
-       absent there is no second url and this issues NO request. */
-    function preloadOther() {
-      if (!dualSource || preloadQueued) return;
-      var other = (urlForTheme() === darkUrl) ? lightUrl : darkUrl;
-      if (!other || loads[other]) return;
-      preloadQueued = true;
-      var run = function () { idleHandle = 0; if (alive) loadResource(other, null, 0); };
-      if (typeof window.requestIdleCallback === "function") {
-        idleHandle = window.requestIdleCallback(run, { timeout: 2000 });
-      } else {
-        later(run, 600);
-      }
-    }
-
-    /* First paint: the polarity class is on the root before anything can be
-       shown, and createResource() sets the src synchronously inside this call,
-       so the initial request still starts on the same tick it always did. What
-       changed is that the element stays hidden until it has decoded — the
-       floor covers that gap, and there is no half-painted frame. */
-    syncPolarity();
-    applySource();
-
-    /* theme.js writes data-theme on <html> and fires no event, so the attribute
-       itself is what gets watched (same idiom as strands.js). The observer is
-       wired in §7, and now unconditionally: the DUOTONE follows the theme even
-       when there is only one photograph, and the old code left it uncreated in
-       exactly that case. */
-    var themeAttr = document.documentElement.getAttribute("data-theme") || "";
-
-    function onThemeChange() {
-      if (!alive) return;
-      var next = document.documentElement.getAttribute("data-theme") || "";
-      if (next === themeAttr) return;
-      themeAttr = next;
-      /* Polarity first, then the photograph. The tint is a class on the root
-         and takes effect on the same frame as the ground it answers, so the
-         window in which the new ground was showing the old ground's treatment
-         — which used to last for the whole of the second file's download, and
-         forever on a stalled request — no longer exists. */
-      syncPolarity();
-      applySource();
-    }
+      var img = document.createElement("img");
+      img.className = "masked-heading__source";
+      img.setAttribute("alt", "");
+      img.setAttribute("draggable", "false");
+      img.setAttribute("decoding", "async");
+      img.addEventListener("error", onSourceError);
+      img.setAttribute("src", src);         /* set last, after the listener */
+      media.appendChild(img);
+      source = img;
+    })();
 
     /* -- 3. place() — drift/parallax transform, clamped so the scaled-up
            media can never expose an edge. ---------------------------------- */
@@ -972,23 +585,9 @@
     }
     window.addEventListener("resize", onResize);
 
-    /* Watch the theme. Wired whether or not there are two photographs to
-       choose between: the DUOTONE follows the theme on its own, and a heading
-       with a single photograph needs the polarity flipped just as much as one
-       with two. (This observer used to be created only in the dual-source
-       case, which is precisely the case index.html does NOT use.) */
-    var themeObserver = null;
-    if ("MutationObserver" in window) {
-      themeObserver = new MutationObserver(onThemeChange);
-      themeObserver.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ["data-theme"]
-      });
-    }
-
     /* The site loads Cormorant Garamond from Google Fonts — the clip geometry
-       is measured against the fallback serif until it lands, so re-measure.
-       (`alive` is declared up in §2, where the async media loads need it.) */
+       is measured against the fallback serif until it lands, so re-measure. */
+    var alive = true;
     var loadFallback = false;
     if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === "function") {
       document.fonts.ready.then(function () {
@@ -1053,7 +652,6 @@
       if (revealCleanup) { revealCleanup(); revealCleanup = null; }
       if (ro) ro.disconnect();
       if (pauseIo) pauseIo.disconnect();
-      if (themeObserver) { themeObserver.disconnect(); themeObserver = null; }
       if (resizeRaf) { cancelAnimationFrame(resizeRaf); resizeRaf = 0; }
       window.removeEventListener("resize", onResize);
       if (loadFallback) window.removeEventListener("load", sync);
@@ -1064,26 +662,7 @@
       }
       root.removeEventListener("pointermove", onMove);
       root.removeEventListener("pointerleave", onLeave);
-
-      /* Media: every timer, the idle callback and every listener on every
-         element this component ever created — one per url, not one in total. */
-      for (var t = 0; t < timers.length; t += 1) window.clearTimeout(timers[t]);
-      timers.length = 0;
-      if (idleHandle && typeof window.cancelIdleCallback === "function") {
-        window.cancelIdleCallback(idleHandle);
-      }
-      idleHandle = 0;
-      for (var url in loads) {
-        if (!hasOwn(loads, url)) continue;
-        var rec = loads[url];
-        if (!rec.el) continue;
-        if (rec.onError) rec.el.removeEventListener("error", rec.onError);
-        if (rec.onReady) {
-          rec.el.removeEventListener(o.mediaType === "video" ? "loadeddata" : "load", rec.onReady);
-        }
-        if (o.mediaType === "video" && rec.el.pause) { try { rec.el.pause(); } catch (e) {} }
-        rec.waiting.length = 0;
-      }
+      if (source && onSourceError) source.removeEventListener("error", onSourceError);
     };
   }
 
