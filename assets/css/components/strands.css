@@ -11,6 +11,14 @@
    chosen in the script rather than in CSS: an additive glow cannot be themed
    by a token, only by the stops fed to the shader.
 
+   Height is the only thing this file really decides, and it decides it
+   freely: the shader's envelope is normalised to the band's own left and
+   right edges, so the aurora fades to nothing at both ends and carries no
+   repeat at ANY width or proportion. Nothing below has to hold a particular
+   ratio to keep the band looking right — earlier versions of this file said
+   otherwise, because an earlier envelope was periodic and the ratio decided
+   where its dead stretches fell.
+
    If WebGL is unavailable the script never adds the canvas, and this file is
    what is left: an empty transparent element of the right height, so the page
    keeps its rhythm instead of collapsing or showing a black rectangle.
@@ -20,7 +28,7 @@
 .strands {
   /* A slim band by default. A page that wants a different one sets --st-height
      on the host and nothing else needs to change; the script re-measures and
-     the shader re-fits the envelope to whatever proportion it finds. */
+     the shader re-normalises itself to whatever box it finds. */
   --st-height: clamp(90px, 12vw, 170px);
 
   position: relative;
@@ -28,6 +36,11 @@
   width: 100%;
   height: var(--st-height);
   overflow: hidden;
+
+  /* Nothing inside can affect the page's layout or paint outside this box —
+     the canvas is inset:0 and the box is already clipped — so say so. On a
+     band that sits on every page it saves the engine the work of proving it. */
+  contain: layout paint;
 
   /* Decorative to the last: it takes no clicks, no selection and no caret,
      and the script also marks it aria-hidden. */
@@ -51,15 +64,16 @@
 }
 
 /* ---- 3. Height modifiers ------------------------------------------------ */
-/* Two ready-made proportions, both keeping the band wide enough that the
-   envelope's dead zones land on the page edges rather than mid-strand. */
+/* Two ready-made proportions. They are a matter of how much air the band is
+   worth on the page and nothing else: the aurora fills whichever box it is
+   given, end to end. */
 .strands--slim { --st-height: clamp(64px, 8vw, 112px); }
 .strands--tall { --st-height: clamp(140px, 20vw, 280px); }
 
 /* ---- 4. Responsive ------------------------------------------------------ */
-/* The clamp already holds the band near an 8:1 proportion from a phone to a
-   desktop, which is what keeps the aurora tapering to nothing at both ends.
-   Only the tall variant needs reining in, so it is the only one touched. */
+/* The clamps hold every variant to a slim band from a phone to a desktop.
+   Only the tall one grows fast enough to crowd a small screen, so it is the
+   only one reined in. */
 @media (max-width: 720px) {
   .strands--tall { --st-height: clamp(120px, 30vw, 200px); }
 }
