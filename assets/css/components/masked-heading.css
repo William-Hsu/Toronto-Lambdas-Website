@@ -1,0 +1,171 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   MaskedHeading — vanilla port of the React Bits component of the same name.
+
+   Structure is the reference's, unchanged (absolute layers, clip-path window,
+   will-change hints). Only the palette is ours: royal blue and white, no third
+   hue. Self-contained — it restyles no existing site selector.
+   ========================================================================== */
+
+/* ---- 1. Root ------------------------------------------------------------- */
+/* padding MUST stay 0: the SVG clip geometry is built from the measuring
+   spans' offsetLeft / offsetTop, which are relative to this element's padding
+   edge. The bottom margin is kept (the reference zeroes it) so the heading
+   holds the same vertical rhythm as every other <h2> on the site.
+
+   NOTE: no font-size here, deliberately — and by default the JS does not set
+   one either. The host element keeps whatever the site's own stylesheet gives
+   it (h2 { font-size: clamp(1.9rem, 3.6vw, 2.75rem) }) and the clip geometry
+   is measured from that, which is the only way this heading can track its
+   siblings across the width where .grid--2 collapses to a single column. */
+.masked-heading {
+  position: relative;
+  width: 100%;
+  margin: 0 0 var(--sp-4, 1rem);
+  padding: 0;
+  font-family: var(--font-display, "Cormorant Garamond", Georgia, serif);
+  text-wrap: balance;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- 2. Measuring copy --------------------------------------------------- */
+/* Invisible, but it is real text in the flow: it drives the layout the clip
+   path is measured against AND it is the accessible/selectable heading text. */
+.masked-heading__measure { color: transparent; }
+
+/* One box per word. white-space: pre keeps a word from breaking inside itself
+   (so each SVG <text> stays one straight run of glyphs); the spaces BETWEEN
+   words are real text nodes in the markup, not ::after pseudo-content, so the
+   heading still reads correctly to assistive tech and can still soft-wrap. */
+.masked-heading__word { display: inline-block; white-space: pre; }
+
+/* Zero-size inline-block; its bottom margin edge sits on the text baseline,
+   which is exactly the y coordinate an SVG <text> needs. */
+.masked-heading__baseline {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  font-style: normal;
+}
+
+/* ---- 3. Clip definitions -------------------------------------------------- */
+.masked-heading__defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ---- 4. Reveal / clip / media layers -------------------------------------- */
+.masked-heading__reveal {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  will-change: opacity, transform, clip-path;
+}
+
+.masked-heading__clip {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.masked-heading__media {
+  position: absolute;
+  inset: 0;
+  display: block;
+  will-change: transform, filter;
+  backface-visibility: hidden;
+}
+
+.masked-heading__source {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ---- 5. Gradient fallback -------------------------------------------------
+   This is the state the site ships in until the exec board drops a wide
+   chapter photo at assets/img/masked-heading.jpg. It is not a placeholder
+   stand-in for a broken image — it is a finished treatment: a deep brand-navy
+   field with a royal-blue core and a slow-moving highlight. It inherits the
+   drift/parallax transform from .masked-heading__media for free, and adds its
+   own internal motion so the letterforms never look like flat fill.
+   Pure CSS — no external request, so it works over file://.
+   -------------------------------------------------------------------------- */
+.masked-heading__fill {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--navy-700, #12296B);
+  background-image:
+    /* upper-left royal glow (--navy-400) */
+    radial-gradient(115% 150% at 8% 4%, rgba(95, 128, 220, 0.95) 0%, rgba(95, 128, 220, 0) 58%),
+    /* lower-right deep shadow (--navy-900) */
+    radial-gradient(105% 140% at 96% 96%, rgba(6, 21, 60, 1) 0%, rgba(6, 21, 60, 0) 62%),
+    /* the base sweep, navy-900 -> navy-700 -> navy-500 -> navy-800 */
+    linear-gradient(112deg,
+      var(--navy-900, #061539) 0%,
+      var(--navy-700, #12296B) 34%,
+      var(--navy-500, #2A50B4) 58%,
+      var(--navy-800, #0B1E52) 100%);
+  background-repeat: no-repeat;
+  background-size: 190% 190%, 190% 190%, 240% 240%;
+  background-position: 6% 12%, 94% 88%, 20% 50%;
+  animation: mh-fill-drift 24s ease-in-out infinite alternate;
+}
+
+/* A single soft sheen crossing the letterforms, on a different period so the
+   two motions never visibly loop together. */
+.masked-heading__fill::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(78deg,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0) 62%);
+  pointer-events: none;
+  animation: mh-fill-sheen 17s ease-in-out infinite alternate;
+}
+
+@keyframes mh-fill-drift {
+  0%   { background-position:  6% 12%, 94% 88%, 20% 50%; }
+  50%  { background-position: 34% 40%, 70% 62%, 62% 42%; }
+  100% { background-position: 18% 76%, 86% 26%, 88% 58%; }
+}
+
+@keyframes mh-fill-sheen {
+  0%   { transform: translate3d(-34%, -8%, 0); }
+  100% { transform: translate3d( 34%,  8%, 0); }
+}
+
+/* ---- 6. Off-screen pause + reduced motion --------------------------------- */
+/* The JS adds .is-paused when the heading scrolls out of view (it also stops
+   its requestAnimationFrame loop there). */
+.masked-heading.is-paused .masked-heading__fill,
+.masked-heading.is-paused .masked-heading__fill::after {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .masked-heading__fill,
+  .masked-heading__fill::after { animation: none; }
+  .masked-heading__reveal { will-change: auto; }
+  .masked-heading__media { will-change: auto; }
+}
+
+/* ---- 7. Last-ditch fallback ----------------------------------------------- */
+/* The JS already refuses to mount where clip-path: url() is unsupported, but
+   if a browser reports support and then does not honour it, this keeps the
+   heading readable instead of invisible. */
+@supports not ((clip-path: url("#mh")) or (-webkit-clip-path: url("#mh"))) {
+  .masked-heading__measure { color: inherit; }
+  .masked-heading__reveal { display: none; }
+}
