@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   BorderGlow — vanilla port of the React Bits component of the same name.
+   The reference's rainbow mesh fill and intro sweep are dropped; what remains
+   is one warm hue (--accent-dark) drawn as a hairline along the border with a
+   quiet bloom outside it, lit only where the pointer is.
+   Self-contained: styles nothing outside .border-glow-card / .edge-light.
+
+   The script writes --edge-proximity (0..1) and --cursor-angle (deg) on the
+   host; everything below is a function of those two numbers.
+   ========================================================================== */
+
+/* ---- 1. Registered properties ------------------------------------------- */
+/* Registration is what makes the proximity fade smoothly instead of snapping.
+   Where @property is unsupported the values still substitute correctly — the
+   glow simply follows the pointer with no easing. */
+@property --edge-proximity {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: true;
+}
+
+@property --cursor-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: true;
+}
+
+/* ---- 2. Host ------------------------------------------------------------ */
+.border-glow-card {
+  /* position: relative is set inline by the script only when the host is
+     static, so an already-positioned host is left exactly as it was. */
+  --bg-color: 43 45% 67%;      /* --accent-dark #C9B98E, as hsl channels */
+  --bg-cone: 120deg;
+  --bg-thickness: 1px;
+  --bg-intensity: 1;
+  --bg-bloom: 9px;
+
+  transition: --edge-proximity 180ms linear;
+}
+
+.border-glow-card.is-lit { transition: --edge-proximity 90ms linear; }
+
+/* ---- 3. The injected light --------------------------------------------- */
+.edge-light {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  border-radius: inherit;   /* square hosts stay square — buttons included */
+  z-index: 2;
+}
+
+/* 3a. The hairline itself: a conic wedge centred on the cursor's bearing,
+       masked down to the border ring. */
+.edge-light::before,
+.edge-light::after {
+  content: "";
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: conic-gradient(
+    from calc(var(--cursor-angle) - var(--bg-cone) / 2) at 50% 50%,
+    hsl(var(--bg-color) / 0) 0deg,
+    hsl(var(--bg-color) / 0.95) calc(var(--bg-cone) / 2),
+    hsl(var(--bg-color) / 0) var(--bg-cone)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.edge-light::before {
+  inset: 0;
+  padding: var(--bg-thickness);
+  opacity: calc(var(--edge-proximity) * var(--bg-intensity));
+}
+
+/* 3b. The bloom: the same wedge, wider, softened, and held well back so it
+       reads as light rather than as a second border. */
+.edge-light::after {
+  inset: calc(var(--bg-bloom) * -1);
+  padding: calc(var(--bg-bloom) + var(--bg-thickness));
+  filter: blur(calc(var(--bg-bloom) * 0.9));
+  opacity: calc(var(--edge-proximity) * var(--bg-intensity) * 0.42);
+}
+
+/* ---- 4. Keyboard focus -------------------------------------------------- */
+/* No cursor bearing exists for a keyboard, so the whole border lights evenly. */
+.border-glow-card.is-focus .edge-light::before,
+.border-glow-card.is-focus .edge-light::after {
+  background-image: none;
+  background-color: hsl(var(--bg-color) / 0.9);
+}
+
+/* ---- 5. Fallback: no mask-composite ------------------------------------- */
+/* Without ring masking the wedge would flood the whole box, so the effect
+   collapses to a plain proximity-lit outline. */
+@supports not ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+  .edge-light::before,
+  .edge-light::after { display: none; }
+
+  .border-glow-card.is-lit {
+    box-shadow:
+      0 0 0 1px hsl(var(--bg-color) / calc(var(--edge-proximity) * var(--bg-intensity) * 0.9)),
+      0 0 14px hsl(var(--bg-color) / calc(var(--edge-proximity) * var(--bg-intensity) * 0.35));
+  }
+}
+
+/* ---- 6. Reduced motion -------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .border-glow-card,
+  .border-glow-card.is-lit { transition: none; }
+  .edge-light::after { display: none; }
+}
+
+/* ---- 7. Print ----------------------------------------------------------- */
+@media print {
+  .edge-light { display: none; }
+}

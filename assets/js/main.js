@@ -68,9 +68,18 @@
         "</a>" +
         '<button class="nav__toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>' +
         '<ul class="nav__links" id="nav-links">' + links +
+          '<li class="nav__theme-item">' +
+            '<button class="nav__theme" type="button" data-theme-toggle aria-pressed="false" title="Switch theme">' +
+              '<span class="nav__theme-glyph" data-theme-glyph aria-hidden="true">☾</span>' +
+              '<span class="visually-hidden" data-theme-label>Dark mode</span>' +
+            "</button>" +
+          "</li>" +
           '<li><a class="nav__cta" href="' + PREFIX + 'rush.html">Rush ΛΦΕ</a></li>' +
         "</ul>" +
       "</nav>";
+
+    /* theme.js paints the glyph / aria-pressed once the button exists. */
+    if (window.LPHIE && window.LPHIE.syncTheme) window.LPHIE.syncTheme();
 
     var toggle = el("nav-toggle"), list = el("nav-links");
     toggle.addEventListener("click", function () {

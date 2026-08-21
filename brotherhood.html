@@ -3,12 +3,28 @@
 <head>
 <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <script>
+      /* Pre-paint the chosen impression before any CSS lands, so the page
+         never flashes the wrong theme. Mirrors assets/js/theme.js. */
+      (function () {
+        try {
+          var t = localStorage.getItem("lphie-theme");
+          if (t !== "light" && t !== "dark") {
+            t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <script src="assets/js/theme.js" defer></script>
     <meta name="theme-color" content="#12296B">
     <link rel="icon" href="assets/img/crest-navy.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/components/drift-wall.css">
   <title>Brotherhood · ΛΦΕ Alpha Xi</title>
   <meta name="description" content="Retreats, big brother pairings, family lines, cultural programming and interchapter visits at the Alpha Xi Chapter of Lambda Phi Epsilon.">
   <meta property="og:title" content="Brotherhood · ΛΦΕ Alpha Xi">
@@ -31,6 +47,14 @@
         <p>Retreats, families, cultural programming and interchapter trips: the parts of the fraternity
         that do not fit on a résumé.</p>
       </div></div>
+    </section>
+
+    <!-- ===== Drift wall (chapter photo band) ===== -->
+    <section class="drift-wall-band">
+      <div class="drift-wall" data-drift-wall='{}'>
+        <p class="drift-wall__fallback">Photographs from the Alpha Xi chapter &mdash; brotherhood retreats, rush,
+        the stem cell registry drive, convention and formal.</p>
+      </div>
     </section>
 
     <section class="section">
@@ -123,6 +147,8 @@
   <script src="data/roster.js"></script>
   <script src="data/alumni.js"></script>
   <script src="data/content.js"></script>
+  <script src="data/driftwall.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/components/drift-wall.js"></script>
 </body>
 </html>

@@ -34,7 +34,7 @@
   --dw-gap: 18px;
   --dw-radius: 8px;
   --dw-lift: 64px;
-  --dw-dim: 0.5;
+  --dw-dim: 0.88;
   --dw-gray: 0;
   --dw-overlay: #061539;   /* --navy-900 */
   --dw-edge: 45%;          /* (1 - fade) * 100 */
@@ -121,7 +121,7 @@
   position: absolute;
   inset: 0;
   background: var(--dw-overlay);
-  opacity: 0.42;
+  opacity: 0.14;
   pointer-events: none;
   transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }

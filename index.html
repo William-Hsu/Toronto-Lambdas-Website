@@ -3,6 +3,21 @@
 <head>
 <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <script>
+      /* Pre-paint the chosen impression before any CSS lands, so the page
+         never flashes the wrong theme. Mirrors assets/js/theme.js. */
+      (function () {
+        try {
+          var t = localStorage.getItem("lphie-theme");
+          if (t !== "light" && t !== "dark") {
+            t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <script src="assets/js/theme.js" defer></script>
     <meta name="theme-color" content="#12296B">
     <link rel="icon" href="assets/img/crest-navy.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,9 +27,11 @@
     <link rel="stylesheet" href="assets/css/components/fold-text.css">
     <link rel="stylesheet" href="assets/css/components/count-up.css">
     <link rel="stylesheet" href="assets/css/components/masked-heading.css">
-    <link rel="stylesheet" href="assets/css/components/drift-wall.css">
     <link rel="stylesheet" href="assets/css/components/accordion-gallery.css">
     <link rel="stylesheet" href="assets/css/components/logo-loop.css">
+    <link rel="stylesheet" href="assets/css/components/morph-slider.css">
+    <link rel="stylesheet" href="assets/css/components/border-glow.css">
+    <link rel="stylesheet" href="assets/css/components/gradual-blur.css">
   <title>ΛΦΕ Alpha Xi · Lambda Phi Epsilon at the University of Toronto</title>
   <meta name="description" content="The Alpha Xi Chapter of Lambda Phi Epsilon International Fraternity at the University of Toronto · chartered in 2004 as the fraternity's first chapter outside the United States.">
   <meta property="og:title" content="ΛΦΕ Alpha Xi · Lambda Phi Epsilon at the University of Toronto">
@@ -31,7 +48,7 @@
   <header class="site-header" id="site-header"></header>
   <main id="main">
     <!-- ===== Hero ===== -->
-    <section class="hero">
+    <section class="hero hero--home">
       <div class="wrap">
         <div class="hero__inner">
           <div>
@@ -45,8 +62,8 @@
             </p>
             <p class="ornament" aria-hidden="true"></p>
             <div class="btn-row">
-              <a class="btn btn--primary" href="rush.html">Rush &Lambda;&Phi;&Epsilon;</a>
-              <a class="btn btn--ghost" href="about.html">Who we are</a>
+              <a class="btn btn--primary" href="rush.html" data-border-glow='{"variant":"navy"}'>Rush &Lambda;&Phi;&Epsilon;</a>
+              <a class="btn btn--ghost" href="about.html" data-border-glow='{"variant":"navy"}'>Who we are</a>
             </div>
           </div>
           <img class="hero__crest" src="assets/img/crest-navy.png" alt="Lambda Phi Epsilon crest" width="340" height="340">
@@ -60,21 +77,21 @@
       </div>
     </section>
 
-    <!-- ===== Chapter plate ===== -->
-    <section class="section section--tight">
+    <!-- ===== Chapter slider (replaces the static chapter plate) ===== -->
+    <section class="section section--tight" style="padding-top:0">
       <div class="wrap">
-        <figure class="plate">
-          <div class="plate__frame">
-            <img src="assets/img/chapter-group.jpg" alt="The brothers of the Alpha Xi Chapter of Lambda Phi Epsilon at the University of Toronto"
-                 width="1003" height="726" loading="lazy">
-          </div>
-          <figcaption>The brothers of Alpha Xi &middot; Lambda Phi Epsilon at the University of Toronto</figcaption>
-        </figure>
+        <div data-morph-slider='{"transition":"melt","duration":1.1,"intensity":0.55,"autoplay":true,"autoplayDelay":5200,"overlayColor":"#0C1B38","label":"The chapter","items":[
+          {"image":"assets/img/chapter-group.jpg","caption":"The brothers of Alpha Xi · Lambda Phi Epsilon at the University of Toronto"},
+          {"image":"assets/img/gallery/alumni-banquet.jpg","caption":"Actives and alumni, annual banquet"},
+          {"image":"assets/img/gallery/reveal-night.jpg","caption":"Reveal night"},
+          {"image":"assets/img/gallery/interchapter-formal.jpg","caption":"Interchapter formal"},
+          {"image":"assets/img/gallery/pool-party.jpg","caption":"Summer pool party"}
+        ]}'></div>
       </div>
     </section>
 
-    <!-- ===== Who we are ===== -->
-    <section class="section">
+    <!-- ===== Who we are (counter-colour: navy plate in light mode, paper in dark) ===== -->
+    <section class="section section--navy">
       <div class="wrap">
         <div class="grid grid--2" style="align-items:start; gap:3rem">
           <div class="reveal">
@@ -105,14 +122,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- ===== Drift wall (chapter photo band) ===== -->
-    <section class="drift-wall-band">
-      <div class="drift-wall" data-drift-wall='{}'>
-        <p class="drift-wall__fallback">Photographs from the Alpha Xi chapter &mdash; brotherhood retreats, rush,
-        the stem cell registry drive, convention and formal.</p>
       </div>
     </section>
 
@@ -176,6 +185,26 @@
       </div>
     </section>
 
+    <!-- ===== Alumni employers ===== -->
+    <section class="section section--tight section--paper">
+      <div class="wrap">
+        <p class="eyebrow">Where Alpha Xi goes</p>
+        <h2>Brothers graduate. The network does not.</h2>
+        <p class="lede measure">A sample of the firms our alumni have gone on to &mdash; and the reason
+        an Alpha Xi email tends to get answered.</p>
+      </div>
+      <div class="mt-6" data-logo-loop='{}'>
+        <!-- Shown only if the script never runs; the component replaces it. -->
+        <ul class="wrap">
+          <li>JPMorgan Chase &amp; Co.</li><li>Purpose Investments</li><li>Onex</li><li>TD</li>
+          <li>Scotiabank</li><li>BMO</li><li>Microsoft</li><li>Amazon</li><li>Citibank</li>
+          <li>Bank of America</li><li>Bank of China</li><li>PwC</li><li>EY</li><li>KPMG</li>
+          <li>Deloitte</li><li>Strategy&amp;</li><li>PushPress</li><li>Qualcomm</li><li>AMD</li>
+          <li>Rogers</li><li>Bell</li>
+        </ul>
+      </div>
+    </section>
+
     <!-- ===== Philanthropy teaser ===== -->
     <section class="section">
       <div class="wrap">
@@ -209,25 +238,6 @@
       </div>
     </section>
 
-    <!-- ===== Alumni employers ===== -->
-    <section class="section section--tight section--paper">
-      <div class="wrap">
-        <p class="eyebrow">Where Alpha Xi goes</p>
-        <h2>Brothers graduate. The network does not.</h2>
-        <p class="lede measure">A sample of the firms our alumni have gone on to &mdash; and the reason
-        an Alpha Xi email tends to get answered.</p>
-      </div>
-      <div class="mt-6" data-logo-loop='{}'>
-        <!-- Shown only if the script never runs; the component replaces it. -->
-        <ul class="wrap">
-          <li>JPMorgan Chase &amp; Co.</li><li>Purpose Investments</li><li>Onex</li><li>TD</li>
-          <li>Scotiabank</li><li>BMO</li><li>Microsoft</li><li>Amazon</li><li>Citibank</li>
-          <li>Bank of America</li><li>Bank of China</li><li>PwC</li><li>EY</li><li>KPMG</li>
-          <li>Deloitte</li><li>Strategy&amp;</li><li>PushPress</li><li>Qualcomm</li><li>AMD</li>
-          <li>Rogers</li><li>Bell</li>
-        </ul>
-      </div>
-    </section>
 
     <!-- ===== CTA ===== -->
     <section class="cta-band">
@@ -236,8 +246,8 @@
         <p>Come to one event. Ask us anything. If it is not for you, there are no hard feelings. If it
         is, you will know quickly.</p>
         <div class="btn-row">
-          <a class="btn btn--light" href="rush.html">See the rush schedule</a>
-          <a class="btn btn--outline-light" href="contact.html">Talk to a brother</a>
+          <a class="btn btn--light" href="rush.html" data-border-glow>See the rush schedule</a>
+          <a class="btn btn--outline-light" href="contact.html" data-border-glow>Talk to a brother</a>
         </div>
       </div>
     </section>
@@ -248,7 +258,6 @@
   <script src="data/roster.js"></script>
   <script src="data/alumni.js"></script>
   <script src="data/content.js"></script>
-  <script src="data/driftwall.js"></script>
   <script src="data/pillars.js"></script>
   <script src="data/logos.js"></script>
   <script src="assets/js/main.js"></script>
@@ -258,8 +267,14 @@
   <script src="assets/js/components/fold-text.js"></script>
   <script src="assets/js/components/count-up.js"></script>
   <script src="assets/js/components/masked-heading.js"></script>
-  <script src="assets/js/components/drift-wall.js"></script>
   <script src="assets/js/components/accordion-gallery.js"></script>
   <script src="assets/js/components/logo-loop.js"></script>
+  <script src="data/galleries.js"></script>
+  <script src="assets/js/components/morph-slider.js"></script>
+  <script src="assets/js/components/border-glow.js"></script>
+  <script src="assets/js/components/gradual-blur.js"></script>
+
+  <!-- Soft blur where the page meets the viewport bottom. -->
+  <div data-gradual-blur='{"target":"page","position":"bottom","height":"4.5rem","strength":1.5,"divCount":5,"curve":"bezier","zIndex":40}'></div>
 </body>
 </html>

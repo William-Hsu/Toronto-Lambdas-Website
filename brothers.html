@@ -3,12 +3,28 @@
 <head>
 <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <script>
+      /* Pre-paint the chosen impression before any CSS lands, so the page
+         never flashes the wrong theme. Mirrors assets/js/theme.js. */
+      (function () {
+        try {
+          var t = localStorage.getItem("lphie-theme");
+          if (t !== "light" && t !== "dark") {
+            t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <script src="assets/js/theme.js" defer></script>
     <meta name="theme-color" content="#12296B">
     <link rel="icon" href="assets/img/crest-navy.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/components/depth-carousel.css">
   <title>Brothers · ΛΦΕ Alpha Xi</title>
   <meta name="description" content="The executive board, active brothers, family lines and charter class of the Alpha Xi Chapter of Lambda Phi Epsilon at the University of Toronto.">
   <meta property="og:title" content="Brothers · ΛΦΕ Alpha Xi">
@@ -30,6 +46,14 @@
         <h1>Families &amp; Charter</h1>
         <p>The family lines of Alpha Xi and the twelve men who founded the chapter.</p>
       </div></div>
+    </section>
+
+    <!-- ===== Chapter gallery (depth carousel) ===== -->
+    <section class="section section--tight">
+      <div class="wrap">
+        <p class="eyebrow">Family lines, on film</p>
+        <div class="mt-6" data-depth-carousel='{"gallery":"families","label":"Family lines","cardWidth":280,"cardHeight":350}'></div>
+      </div>
     </section>
 
     <section class="section">
@@ -61,6 +85,8 @@
   <script src="data/roster.js"></script>
   <script src="data/alumni.js"></script>
   <script src="data/content.js"></script>
+  <script src="data/galleries.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/components/depth-carousel.js"></script>
 </body>
 </html>

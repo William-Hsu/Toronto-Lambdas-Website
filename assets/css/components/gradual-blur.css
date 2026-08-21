@@ -1,0 +1,71 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   GradualBlur — vanilla port of the React Bits component of the same name.
+   Structure follows the reference; the fallback tint is the site's paper
+   token so the band still reads as a soft edge where backdrop-filter is
+   unavailable. Self-contained: styles nothing outside .gradual-blur.
+
+   Geometry (band depth, z-index, opacity) is written inline by the script,
+   because it is computed from the same config that drives the blur maths.
+   ========================================================================== */
+
+/* ---- 1. Host ------------------------------------------------------------ */
+.gradual-blur {
+  display: block;
+  pointer-events: none;
+  isolation: isolate;
+
+  /* Colour used only by the no-backdrop-filter fallback in §4. */
+  --gb-fallback: var(--paper, #F5F1E6);
+}
+
+/* Anchored inside whatever box the page put it in. */
+.gradual-blur--parent { position: absolute; }
+
+/* A page-wide overlay pinned to the viewport. */
+.gradual-blur--page { position: fixed; }
+
+/* ---- 2. Edge anchoring -------------------------------------------------- */
+.gradual-blur--top    { top: 0;    left: 0;  right: 0; }
+.gradual-blur--bottom { bottom: 0; left: 0;  right: 0; }
+.gradual-blur--left   { left: 0;   top: 0;   bottom: 0; }
+.gradual-blur--right  { right: 0;  top: 0;   bottom: 0; }
+
+/* ---- 3. Layers ---------------------------------------------------------- */
+/* Each layer's mask-image and backdrop-filter are set inline per layer. */
+.gradual-blur__layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* A mask with no repeat or resize surprises on any engine. */
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+/* ---- 4. Fallback: no backdrop-filter ------------------------------------ */
+/* Firefox before 103 and older Safari. The masked layers would paint nothing
+   at all, so they are dropped and the host fades a single tint instead. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .gradual-blur__layer { display: none; }
+
+  .gradual-blur--top {
+    background: linear-gradient(to top, transparent 0%, var(--gb-fallback) 92%);
+  }
+  .gradual-blur--bottom {
+    background: linear-gradient(to bottom, transparent 0%, var(--gb-fallback) 92%);
+  }
+  .gradual-blur--left {
+    background: linear-gradient(to left, transparent 0%, var(--gb-fallback) 92%);
+  }
+  .gradual-blur--right {
+    background: linear-gradient(to right, transparent 0%, var(--gb-fallback) 92%);
+  }
+}
+
+/* ---- 5. Print ----------------------------------------------------------- */
+/* A blur is meaningless on paper and only muddies the plate. */
+@media print {
+  .gradual-blur { display: none; }
+}
