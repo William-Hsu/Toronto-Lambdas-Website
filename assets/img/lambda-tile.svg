@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Watermark tile for ProfileCard's holographic layer. Used as a CSS mask,
+       so it is read for LUMINANCE only: white shows the foil, black hides it.
+       The reference ships an abstract icon pattern; the chapter's mark is the
+       lambda, set as a half-drop repeat so the foil breaks up like a security
+       print rather than a grid. -->
+  <rect width="120" height="120" fill="#000"/>
+  <g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="square" stroke-linejoin="miter">
+    <!-- centre lambda -->
+    <path d="M42 82 L60 34 L78 82"/>
+    <!-- the same glyph at each corner completes the half-drop -->
+    <path d="M-18 22 L0 -26 L18 22"/>
+    <path d="M102 22 L120 -26 L138 22"/>
+    <path d="M-18 142 L0 94 L18 142"/>
+    <path d="M102 142 L120 94 L138 142"/>
+  </g>
+</svg>

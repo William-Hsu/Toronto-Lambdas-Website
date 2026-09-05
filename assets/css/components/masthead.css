@@ -14,11 +14,12 @@
   white-space: nowrap;
   padding-inline: clamp(0.9rem, 1.5vw, 1.4rem);
   min-width: max-content;
+  margin-left: 0;
 }
 
 /* In the stacked mobile menu the plate spans the menu instead. */
 @media (max-width: 900px) {
-  .nav__cta { min-width: 0; }
+  .nav__cta { min-width: 0; margin-top: 0; }
 }
 
 /* ---- 2. Masthead layout -------------------------------------------------
@@ -48,6 +49,10 @@
   /* The itinerary drops out of flow into the menu, leaving mark and switch. */
   .nav { grid-template-columns: 1fr auto; }
 
+  /* Out of flow it is a drawer spanning the whole rule, not a centred track
+     item — the centring above would otherwise shrink it to its longest link. */
+  .nav__links { justify-self: stretch; }
+
   /* The switch lives beside the menu button now, not inside the menu, so it
      keeps its engraved-square shape rather than the full-width menu row. */
   .nav__theme {
@@ -70,12 +75,23 @@
    page, its lettering is set tighter than body small-caps, and the chapter
    line drops to its short form well before the row would crowd. */
 .site-header .wrap.nav {
-  max-width: min(1440px, 95vw);
-  padding-inline: clamp(1rem, 2vw, 1.5rem);
+  /* Wider than the page's own measure, and inset barely at all: the mark sits
+     in the top-left CORNER and the plate and switch sit in the top-right, the
+     way a masthead rule runs to the trim rather than to the text block. The
+     floor on the padding is the page gutter, so on a phone the mark still
+     lines up with the copy below it instead of hanging off the edge. */
+  max-width: min(1720px, 98.5vw);
+  padding-inline: clamp(1rem, 1.1vw, 1.25rem);
 }
 
+/* The itinerary is set tight enough to FIT at the narrowest desktop width —
+   just above the 900px drawer breakpoint the row has only a few pixels to
+   spare between the mark and the first link. Anything wider than that is spare
+   room, so the links spend it on air between themselves: the padding stays at
+   its floor until roughly 1200px and then opens out, capped before the row
+   could reach the mark on the left or the plate on the right. */
 .nav__links a {
-  padding-inline: var(--sp-1);
+  padding-inline: clamp(var(--sp-1), 1.35vw - 0.7rem, var(--sp-4));
   letter-spacing: .07em;
   font-size: .69rem;
 }
@@ -93,4 +109,12 @@
 @media (max-width: 1500px) {
   .nav__chapter--full { display: none; }
   .nav__chapter--short { display: inline; }
+}
+
+/* On a phone the right-hand zone carries plate, switch and menu button at
+   once. "RUSH" alone still reads as the invitation; the letters go first. */
+@media (max-width: 620px) {
+  .nav__cta-mark { display: none; }
+  .nav__cta { padding-inline: var(--sp-3) !important; font-size: .62rem !important; }
+  .nav__toggle { padding-inline: var(--sp-3); }
 }

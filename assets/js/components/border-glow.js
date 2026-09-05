@@ -39,7 +39,14 @@
 
   var VARIANTS = {
     gold: "43 45% 67%",      /* --accent-dark #C9B98E */
-    navy: "219 48% 34%"      /* a lit cousin of --navy-700 #1B3057 */
+    navy: "219 48% 34%",     /* a lit cousin of --navy-700 #1B3057 */
+    /* "auto" is the theme-following variant: the script writes NO colour and
+       the stylesheet's own default stands, which is navy on the light
+       impression and gilt on the dark one. It is what the site-wide pass in
+       main.js marks every button with, because one fixed hue cannot be right
+       in both impressions — gilt vanishes on ivory paper, navy vanishes on
+       the midnight plate. */
+    auto: null
   };
 
   var NUMERIC = [
@@ -69,9 +76,9 @@
     }
     for (i = 0; i < NUMERIC.length; i++) o[NUMERIC[i]] = num(o[NUMERIC[i]], DEFAULTS[NUMERIC[i]]);
 
-    if (!VARIANTS[o.variant]) o.variant = "gold";
+    if (!Object.prototype.hasOwnProperty.call(VARIANTS, o.variant)) o.variant = "gold";
     if (!o.glowColor) o.glowColor = VARIANTS[o.variant];
-    o.glowColor = String(o.glowColor).trim();
+    o.glowColor = o.glowColor ? String(o.glowColor).trim() : null;
 
     o.glowRadius = Math.max(1, o.glowRadius);
     o.coneSpread = Math.max(10, Math.min(360, o.coneSpread));
@@ -99,7 +106,9 @@
     var computed = window.getComputedStyle ? window.getComputedStyle(host) : null;
     if (computed && computed.position === "static") host.style.position = "relative";
 
-    host.style.setProperty("--bg-color", cfg.glowColor);
+    /* A null colour is the "auto" variant: leave --bg-color to the stylesheet
+       so it can differ between the two impressions. */
+    if (cfg.glowColor) host.style.setProperty("--bg-color", cfg.glowColor);
     host.style.setProperty("--bg-cone", cfg.coneSpread + "deg");
     host.style.setProperty("--bg-thickness", cfg.thickness + "px");
     host.style.setProperty("--bg-intensity", String(cfg.intensity));

@@ -75,10 +75,11 @@
             "</span>" +
           "</span>" +
         "</a>" +
-        '<ul class="nav__links" id="nav-links">' + links +
-          '<li><a class="nav__cta" href="' + PREFIX + 'rush.html">Rush ΛΦΕ</a></li>' +
-        "</ul>" +
+        /* data-dock: components/dock.js magnifies the link nearest the
+           pointer. Transform-only, so the centre track keeps its width. */
+        '<ul class="nav__links" id="nav-links" data-dock=\'{}\'>' + links + "</ul>" +
         '<div class="nav__end">' +
+          '<a class="nav__cta" href="' + PREFIX + 'rush.html" data-border-glow=\'{"variant":"auto"}\'>Rush<span class="nav__cta-mark"> ΛΦΕ</span></a>' +
           '<button class="nav__theme" type="button" data-theme-toggle aria-pressed="false" title="Switch theme">' +
             '<span class="nav__theme-glyph" data-theme-glyph aria-hidden="true">☾</span>' +
             '<span class="visually-hidden" data-theme-label>Dark mode</span>' +
@@ -271,13 +272,19 @@
   function renderAlumni() {
     var host = el("alumni-grid");
     if (!host) return;
+    /* components/profile-card.js reads these four fields back out of the DOM
+       and rebuilds the article as a tilting foil card. The markup below is
+       what a reader gets if that script never loads, so it stays legible on
+       its own: heading, role, company, note. */
     host.innerHTML = (window.LPHIE.alumni || []).map(function (a) {
-      return '<article class="card card--hover">' +
-        '<div class="card__icon">' + esc(initials(a.name)) + "</div>" +
-        "<h3>" + esc(a.name) + "</h3>" +
-        "<p><strong>" + esc(a.title) + "</strong><br>" +
-        (isTodo(a.org) ? '<span class="tag tag--todo">Add company</span>' : esc(a.org)) + "</p>" +
-        (a.note ? '<p class="brother__meta">' + esc(a.note) + "</p>" : "") +
+      var opts = { monogram: initials(a.name) };
+      if (a.logo) opts.logo = PREFIX + "assets/img/logos/" + a.logo;
+      return '<article class="card card--hover alumni-card" data-profile-card=\'' +
+          esc(JSON.stringify(opts)) + "'>" +
+        '<h3 data-pc="name">' + esc(a.name) + "</h3>" +
+        '<p data-pc="title">' + esc(a.title) + "</p>" +
+        '<p data-pc="org">' + esc(a.org) + "</p>" +
+        (a.note ? '<p class="brother__meta" data-pc="note">' + esc(a.note) + "</p>" : "") +
       "</article>";
     }).join("");
 
@@ -407,6 +414,24 @@
     Array.prototype.forEach.call(nodes, function (n) { io.observe(n); });
   }
 
+  /* ---- 9b. Border glow on every button ---------------------------------
+     The glow was opted into one button at a time on the home page, which meant
+     the same control was lit in the hero and dark three sections later. It is
+     a property of the CLASS of buttons, so it is marked here — on .btn and on
+     the masthead plate — rather than page by page. An element that already
+     carries data-border-glow keeps its own settings.
+
+     components/border-glow.js auto-inits on DOMContentLoaded, and main.js
+     registers its listener first (it is loaded above every component), so the
+     attributes below are in place before that pass runs. */
+  function glowButtons() {
+    var nodes = document.querySelectorAll(".btn, .nav__cta");
+    Array.prototype.forEach.call(nodes, function (n) {
+      if (n.hasAttribute("data-border-glow")) return;
+      n.setAttribute("data-border-glow", '{"variant":"auto"}');
+    });
+  }
+
   /* ---- 10. Contact form (mailto fallback) ------------------------------- */
   function wireForm() {
     var form = el("contact-form");
@@ -434,7 +459,7 @@
     buildHeader(); buildFooter(); fillTokens();
     renderExec(); renderActives(); renderCharter(); renderFamilies();
     renderValues(); renderAlumni(); renderTraditions(); renderFaq();
-    renderSchedule(); renderGallery(); wireForm(); reveal();
+    renderSchedule(); renderGallery(); wireForm(); glowButtons(); reveal();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

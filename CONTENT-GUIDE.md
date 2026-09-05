@@ -56,6 +56,11 @@ Two things worth knowing:
 - The company logos are other people's trademarks. Use them only to describe where alumni
   actually work, and drop any company that asks you to — blank that entry's `src` and it
   falls back to a wordmark automatically.
+- The **alumni spotlight cards** on `alumni.html` take the same treatment through an optional
+  `logo` field in `data/alumni.js` — the filename only, e.g. `logo: "microsoft.svg"`. Give it
+  one and the card shows the mark; leave it out and the card sets the company's name in
+  engraved caps instead. Both read correctly, so add a logo only where the chapter is
+  entitled to use it.
 
 ## Termly checklist
 

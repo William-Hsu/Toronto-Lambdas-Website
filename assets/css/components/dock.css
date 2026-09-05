@@ -1,0 +1,67 @@
+/* ==========================================================================
+   Lambda Phi Epsilon — Alpha Xi Chapter
+   Dock — vanilla port of the React Bits component of the same name.
+   The reference's floating plate, rounded tiles and hover tooltips are all
+   dropped: the masthead keeps the formatting it had, and gains only the
+   dock's behaviour — a sprung swell that follows the pointer along the row.
+
+   The script writes, per item:
+     transform        the swell itself (scale about the baseline + a small lift)
+     --dock-amount    0..1, that item's share of the swell, for the ink below
+   ========================================================================== */
+
+@property --dock-amount {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
+}
+
+/* ---- 1. The row --------------------------------------------------------- */
+/* Nothing about the row's layout changes — the swell is transform-only, so the
+   centre track of the masthead grid keeps the exact width it had. */
+.dock-row.is-docked .dock-item {
+  /* Scale about the baseline, so engraved caps swell UP off their rule
+     instead of drifting through it. */
+  transform-origin: 50% 100%;
+  will-change: transform;
+
+  /* The script owns transform on the frame; anything else must not compete
+     for it, or the two writers fight and the row judders. */
+  transition: color .15s var(--ease, ease);
+}
+
+/* ---- 2. The ink --------------------------------------------------------- */
+/* A dock magnifies; engraved lettering also DARKENS as it comes forward, the
+   way a struck letter takes more ink under pressure. --dock-amount carries the
+   proximity so the nearest few links warm before the pointer reaches them.
+
+   color-mix keeps this to one declaration in two impressions: --ink-soft and
+   --navy-700 are both already theme tokens. Where it is unsupported the plain
+   colour above it stands and only the swell remains. */
+.dock-row.is-docked .dock-item {
+  color: var(--ink-soft);
+  color: color-mix(in srgb, var(--navy-700) calc(var(--dock-amount, 0) * 100%), var(--ink-soft));
+}
+
+/* The current page is already struck in full ink and underlined; it must not
+   fade back to --ink-soft when the pointer is elsewhere in the row. */
+.dock-row.is-docked .dock-item[aria-current="page"] {
+  color: var(--navy-700);
+}
+
+/* ---- 3. Not a dock ------------------------------------------------------ */
+/* Below the drawer breakpoint, on touch, and under reduced motion the script
+   never adds .is-docked and never writes a transform — the row is left exactly
+   as style.css §5 drew it. This rule only guarantees no residue if the class
+   is removed mid-swell. */
+.dock-row:not(.is-docked) .dock-item {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-row .dock-item { transform: none !important; }
+}
+
+@media print {
+  .dock-row .dock-item { transform: none !important; color: var(--ink) !important; }
+}

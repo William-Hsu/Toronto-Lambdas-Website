@@ -30,7 +30,10 @@
 .border-glow-card {
   /* position: relative is set inline by the script only when the host is
      static, so an already-positioned host is left exactly as it was. */
-  --bg-color: 43 45% 67%;      /* --accent-dark #C9B98E, as hsl channels */
+  /* The light impression's default. Blue ink on ivory: a gilt hairline would
+     be invisible here, so the glow is the primary navy, lit. The script
+     overrides this inline for every variant EXCEPT "auto". */
+  --bg-color: 219 48% 34%;     /* a lit cousin of --navy-700 #1B3057 */
   --bg-cone: 120deg;
   --bg-thickness: 1px;
   --bg-intensity: 1;
@@ -40,6 +43,10 @@
 }
 
 .border-glow-card.is-lit { transition: --edge-proximity 90ms linear; }
+
+/* The dark impression inverts the ground, so the glow inverts with it: gilt on
+   the midnight plate, where navy would read as a smudge. */
+[data-theme="dark"] .border-glow-card { --bg-color: 43 45% 67%; }   /* --accent-dark */
 
 /* ---- 3. The injected light --------------------------------------------- */
 .edge-light {
